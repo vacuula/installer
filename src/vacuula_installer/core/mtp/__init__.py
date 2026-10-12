@@ -4,7 +4,7 @@ import io
 import logging
 import os
 from collections.abc import Callable, Iterable
-from typing import BinaryIO, Union
+from typing import BinaryIO, Self
 
 import usb.core
 import usb.util
@@ -14,7 +14,7 @@ from .consts import *
 logger = logging.getLogger(__name__)
 
 # Something to upload: raw bytes, a path, or an open binary file.
-DataSource = Union[bytes, bytearray, memoryview, str, os.PathLike, BinaryIO]
+DataSource = bytes | bytearray | memoryview | str | os.PathLike | BinaryIO
 ProgressFn = Callable[[int, int], None]  # (bytes_sent, total_bytes)
 
 
@@ -27,7 +27,7 @@ class _Source:
             self.stream: BinaryIO = io.BytesIO(source)
             self.size = len(source)
         elif isinstance(source, (str, os.PathLike)):
-            self.stream = open(source, "rb")
+            self.stream = open(source, "rb")  # noqa: SIM115 -- owned + closed by _Source
             self._owned = True
             self.size = os.fstat(self.stream.fileno()).st_size
         else:
@@ -42,7 +42,7 @@ class _Source:
             raise MtpError(f"Source ended early: wanted {n} bytes, got {len(data)}")
         return data
 
-    def __enter__(self) -> _Source:
+    def __enter__(self) -> Self:
         return self
 
     def __exit__(self, *exc) -> None:
@@ -59,7 +59,7 @@ class MTP_PACKET:
 
     @classmethod
     def parse(cls, raw_bytes):
-        l = int.from_bytes(raw_bytes[0:4], "little")
+        int.from_bytes(raw_bytes[0:4], "little")
         container_type = int.from_bytes(raw_bytes[4:6], "little")
         code = int.from_bytes(raw_bytes[6:8], "little")
         tx_id = int.from_bytes(raw_bytes[8:12], "little")
@@ -286,7 +286,7 @@ class MtpDevice:
         ids = self._tx_data_out(
             Operations.SendObjectInfo, [storage_id, parent_id], object_info
         )
-        storage_id, parent_handle, newfile_handle = ids
+        storage_id, _parent_handle, newfile_handle = ids
         return newfile_handle
 
     def send_object(self, file_data: bytes):

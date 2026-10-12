@@ -14,6 +14,8 @@ TODO: A wifi core class that attempts to use the original robot selfdetection me
 
 from __future__ import annotations
 
+from typing import ClassVar
+
 from PySide6.QtCore import QRect, Qt, Signal
 from PySide6.QtWidgets import (
     QComboBox,
@@ -36,7 +38,7 @@ from vacuula_installer.widgets.width_tracking_label import WidthTrackingLabel
 class WifiScreen(QWidget):
     """Emits :attr:`wifiAdded` with SSID, password"""
 
-    _BARS = {1: "▂", 2: "▂▄", 3: "▂▄▆"}
+    _BARS: ClassVar[dict[int, str]] = {1: "▂", 2: "▂▄", 3: "▂▄▆"}
 
     wifiAdded = Signal(str, str)
     prewifiConnectedClicked = Signal()

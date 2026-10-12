@@ -108,17 +108,13 @@ class Gen4Provisioner(QObject):
             return
         self._done.emit(None)
 
-    def _install_static_files(
-        self, mtp: MtpDevice | WindowsMtpDevice, storage_id: int
-    ) -> None:
+    def _install_static_files(self, mtp: MtpDevice, storage_id: int) -> None:
         # install static files
         for install_path, local_path in FILES.items():
             with open(SCRIPTS_DIR / "gen4" / local_path, "rb") as f:
                 mtp.send_file(install_path, storage_id, f.read())
 
-    def _set_vacuula_server(
-        self, mtp: MtpDevice | WindowsMtpDevice, storage_id: int
-    ) -> None:
+    def _set_vacuula_server(self, mtp: MtpDevice, storage_id: int) -> None:
         # set server
         new_config = dedent(f"""\
             [N]
@@ -137,7 +133,7 @@ class Gen4Provisioner(QObject):
             "/home/root/tron/config/ssl/vacuula.crt", storage_id, self.vacuula_cert
         )
 
-    def _set_wifi(self, mtp: MtpDevice | WindowsMtpDevice, storage_id: int) -> None:
+    def _set_wifi(self, mtp: MtpDevice, storage_id: int) -> None:
         # update Wifi (optional)
         if self.wifi_ssid is None:
             return
@@ -155,7 +151,7 @@ class Gen4Provisioner(QObject):
             "/etc/wpa_supplicant/wpa_supplicant-wlan0.conf", storage_id, wifi_config
         )
 
-    def _set_hosts(self, mtp: MtpDevice | WindowsMtpDevice, storage_id: int) -> None:
+    def _set_hosts(self, mtp: MtpDevice, storage_id: int) -> None:
         # update hosts file if manual ip was used (optional)
         if not self.manual_ip:
             return

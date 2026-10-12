@@ -393,7 +393,7 @@ class FirmwareUpdater(QObject):
             if close is not None:
                 try:
                     close()
-                except Exception:  # noqa: BLE001
+                except Exception:  # noqa: BLE001, S110 -- defensive teardown
                     pass
 
         self._install_done.emit(key)

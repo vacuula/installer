@@ -10,6 +10,7 @@ from __future__ import annotations
 import logging
 import sys
 from collections.abc import Callable
+from typing import Literal
 
 import usb.core  # type: ignore[reportMissingTypeStubs]
 from PySide6.QtCore import (
@@ -670,7 +671,7 @@ class MainWindow(QMainWindow):
                     "error.generic.unexpected", detailed="error.generic.help"
                 )
 
-    def get_gen(self) -> gen2 | gen3 | gen4 | None:
+    def get_gen(self) -> Literal["gen2", "gen3", "gen4"] | None:
         match self._session.robot_model_display_name:
             case "Neato D10" | "Neato D9" | "Neato D8" | "Neato D800":
                 return "gen4"

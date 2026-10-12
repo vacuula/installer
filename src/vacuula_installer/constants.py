@@ -5,6 +5,8 @@ from __future__ import annotations
 from pathlib import Path
 from typing import NamedTuple
 
+from ._build_version import APP_VERSION  # noqa: F401  # re-exported
+
 # --------------------------------------------------------------------------
 # Application metadata
 # --------------------------------------------------------------------------

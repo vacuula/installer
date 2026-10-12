@@ -175,13 +175,11 @@ class NeatoRobot:
         blocks = (total + 1023) // 1024
         started = time.monotonic()
         sent = 0
-        n = 0
-        for off in range(0, total, ONESHOT_CHUNK):
+        for n, off in enumerate(range(0, total, ONESHOT_CHUNK), start=1):
             chunk = data[off : off + ONESHOT_CHUNK]
             self.ser.write(chunk)
             time.sleep(ONESHOT_DELAY)
             sent += len(chunk)
-            n += 1
             elapsed = max(time.monotonic() - started, 1.0)
             self._log(
                 f"{int(elapsed):-3d} sec - Sent block {n:5d}/{blocks:<5d} "
@@ -391,8 +389,8 @@ def upload_file(
     finally:
         try:
             robot.close()
-        except Exception:
-            pass
+        except Exception:  # noqa: BLE001 -- best-effort close
+            logger.error(f"Failed to close robot serial link {robot}")
 
 
 # terminal app

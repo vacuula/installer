@@ -13,6 +13,7 @@ import winreg
 from collections.abc import Iterable
 from ctypes import POINTER, c_ubyte, c_uint64, c_ushort, c_void_p, cast, pointer
 from types import SimpleNamespace
+from typing import Self
 
 import comtypes
 import comtypes.client
@@ -400,9 +401,7 @@ def _registered_wpd_paths() -> list[tuple[str, bool]]:
 def _matches(path: str, serial: str | None, prefix: str | None) -> bool:
     if prefix and f"#{prefix}&" in path:
         return True  # composite layout
-    if serial and f"#{serial.lower()}#" in path:
-        return True  # single-function layout
-    return False
+    return bool(serial and f"#{serial.lower()}#" in path)  # single-function layout
 
 
 def _candidate_device_ids(serial: str | None) -> list[str]:
@@ -471,7 +470,7 @@ class WindowsMtpDevice(MtpDevice):
             if self._dev is not None:
                 try:
                     self._dev.Close()
-                except Exception:  # noqa: BLE001
+                except Exception:  # noqa: BLE001, S110 -- release COM before CoUninitialize
                     pass
                 self._dev = None
             comtypes.CoUninitialize()
@@ -519,7 +518,7 @@ class WindowsMtpDevice(MtpDevice):
             self._dev = None
             comtypes.CoUninitialize()
 
-    def __enter__(self) -> WindowsMtpDevice:
+    def __enter__(self) -> Self:
         return self
 
     def __exit__(self, *exc) -> None:
@@ -593,7 +592,7 @@ class WindowsMtpDevice(MtpDevice):
         """Best-effort END_TRANSFER after a failed data phase."""
         try:
             self._end_transfer(context, opcode)
-        except Exception:  # noqa: BLE001
+        except Exception:  # noqa: BLE001, S110 -- best-effort abort
             pass
 
     @staticmethod
