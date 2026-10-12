@@ -39,14 +39,7 @@ jobs:
       run: uv sync --locked
 
     - name: Lint with Ruff
-      run: |
-        # Fail the build on syntax errors and undefined names (same intent
-        # as the previous flake8 --select=E9,F63,F7,F82 invocation).
-        uv run --locked ruff check --select E9,F63,F7,F82 .
-
-        # Report everything else (long lines, complexity, ...) as warnings
-        # only. 127 chars matches the old flake8 config.
-        uv run --locked ruff check --select E501,C901 --line-length 127 --exit-zero .
+      run: uv run --locked ruff check .
 
     - name: Type-check with ty
       run: uv run --locked ty check --output-format github
