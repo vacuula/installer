@@ -250,7 +250,7 @@ class FirmwareUpdateScreen(QWidget):
         self._retranslate()
         self._show_page("pick")
 
-    def set_generation(self, gen: str) -> None:
+    def set_generation(self, gen: str | None) -> None:
         """`gen` is "gen3" or "gen4" -- only firmwares for that generation
         are offered. Call this before showing the screen."""
         self._gen = gen

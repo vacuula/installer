@@ -60,6 +60,8 @@ def _set_windows_app_user_model_id() -> None:
     try:
         import ctypes
 
+        # ctypes.windll only exists on Windows; the checker targets Linux too.
+        # ty: ignore[unresolved-attribute]
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
             WINDOWS_APP_USER_MODEL_ID
         )

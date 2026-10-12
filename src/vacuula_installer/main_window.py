@@ -10,7 +10,7 @@ from __future__ import annotations
 import logging
 import sys
 from collections.abc import Callable
-from typing import Literal
+from typing import Literal, cast
 
 import usb.core  # type: ignore[reportMissingTypeStubs]
 from PySide6.QtCore import (
@@ -423,11 +423,11 @@ class MainWindow(QMainWindow):
                 )
                 return
             self._firmware_updater.start_gen3_update(
-                self._session.robot_usb_device, key, mac
+                cast(usb.core.Device, self._session.robot_usb_device), key, mac
             )
         else:
             self._firmware_updater.start_gen4_update(
-                self._session.robot_usb_device, key
+                cast(usb.core.Device, self._session.robot_usb_device), key
             )
 
     def _show_error(self, message: str, *, detailed: bool | str = False) -> None:

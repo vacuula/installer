@@ -17,11 +17,11 @@ from vacuula_installer.theme import apply_app_palette
 
 prepare_app_identity()
 setup_logging()
-logger = logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
 
 def main() -> int:
-    logger.info("Starting Vacuula Installer")
+    log.info("Starting Vacuula Installer")
 
     app = QApplication(sys.argv)
     apply_app_palette(app)

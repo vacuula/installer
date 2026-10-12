@@ -1,3 +1,6 @@
+# pyusb/pyserial assign device/endpoint fields via setattr and ship no stubs,
+# so the checker cannot see those attributes; disable that rule for the module.
+# ty: ignore[unresolved-attribute]
 """Robot detection.
 Multiple robots not allowed
 Can be used to detect disconnection, care about polling rate
@@ -175,7 +178,7 @@ class RobotDetector(QObject):
         # Keyed by (bus, address) of the physical USB device. Avoids
         # repeating the blocking "getVersion" serial round-trip on every
         # single poll once a GEN23_USB robot has already been identified.
-        self._resolved_cache: dict[tuple[int, int], RobotUsbId] = {}
+        self._resolved_cache: dict[tuple[int | None, int | None], RobotUsbId] = {}
 
     def start(self, delay_ms: int) -> None:
         """Begin polling; emits ``robotDetected`` after ``delay_ms``."""
@@ -269,8 +272,8 @@ class RobotDetector(QObject):
                 usb.util.get_string(dev, dev.iManufacturer)
                 if dev.iManufacturer
                 else None
-            )  # ty: ignore[unresolved-attribute]
-            product = usb.util.get_string(dev, dev.iProduct) if dev.iProduct else None  # ty: ignore[unresolved-attribute]
+            )
+            product = usb.util.get_string(dev, dev.iProduct) if dev.iProduct else None
         except (usb.core.USBError, ValueError, NotImplementedError):
             return False
         return (
@@ -286,7 +289,7 @@ class RobotDetector(QObject):
         exactly which model it is. Each USB id group has exactly one valid
         way to resolve it.
         """
-        usb_id = [dev.idVendor, dev.idProduct]  # ty: ignore[unresolved-attribute]
+        usb_id = [dev.idVendor, dev.idProduct]
 
         if usb_id == GEN4_USB:
             return self._match_by_usb_serial(dev, candidates)
@@ -322,7 +325,7 @@ class RobotDetector(QObject):
             return None
         for candidate in candidates:
             if candidate.serial_model in version_output:
-                self._resolved_cache[cache_key] = candidate  # ty: ignore[invalid-assignment]
+                self._resolved_cache[cache_key] = candidate
                 return candidate
         return None
 
@@ -337,7 +340,7 @@ class RobotDetector(QObject):
         vid_pid_matches = [
             port
             for port in serial.tools.list_ports.comports()
-            if port.vid == dev.idVendor and port.pid == dev.idProduct  # ty: ignore[unresolved-attribute]
+            if port.vid == dev.idVendor and port.pid == dev.idProduct
         ]
         if target_serial:
             for port in vid_pid_matches:
@@ -400,7 +403,7 @@ class RobotDetector(QObject):
     def _get_serial(dev: usb.core.Device) -> str:
         if sys.platform == "win32":
             # libusb cannot open the device on Windows.
-            if [dev.idVendor, dev.idProduct] == GEN4_USB:  # ty: ignore[unresolved-attribute]
+            if [dev.idVendor, dev.idProduct] == GEN4_USB:
                 # Gen4 may expose only MTP (no COM port), so ask Windows'
                 # device list instead. Works for both USB layouts.
                 from vacuula_installer.core.mtp.windows import present_robot_serials

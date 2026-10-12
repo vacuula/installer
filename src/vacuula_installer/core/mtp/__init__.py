@@ -143,6 +143,8 @@ class MtpDevice:
     def _send_data_stream(
         self, tx_id: int, code: int, src: _Source, progress: ProgressFn | None = None
     ) -> None:
+        # pyusb populates endpoint attributes dynamically; invisible to the checker.
+        # ty: ignore[unresolved-attribute]
         packet = self.ep_out.wMaxPacketSize
         chunk = max(packet, self.WRITE_CHUNK // packet * packet)
         total = 12 + src.size
@@ -194,7 +196,7 @@ class MtpDevice:
             raise MtpError(f"Expected Data, got {data.container_type}")
         return data.payload
 
-    def _read_response(self, timeout: int | None = None) -> tuple[int]:
+    def _read_response(self, timeout: int | None = None) -> tuple[int, ...]:
         resp = self._read_pkt(timeout)
         if resp.container_type != ContainerType.Response:
             raise MtpError(f"Expected Response, got {resp.container_type}")
