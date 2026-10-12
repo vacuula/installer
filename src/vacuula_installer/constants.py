@@ -10,6 +10,7 @@ from ._build_version import APP_VERSION  # noqa: F401  # re-exported
 # --------------------------------------------------------------------------
 # Application metadata
 # --------------------------------------------------------------------------
+from vacuula_installer._build_version import APP_VERSION  # noqa: F401 # re-export
 
 # Must equal the .desktop file's basename (without ".desktop") on Linux.
 APP_ID = "VacuulaInstaller"
