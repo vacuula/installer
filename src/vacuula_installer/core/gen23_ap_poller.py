@@ -22,6 +22,7 @@ HEADERS = {
     "user-agent": "okhttp/4.9.1",
 }
 
+
 def _legacy_ssl_context() -> ssl.SSLContext:
     ctx = ssl.create_default_context()
     ctx.check_hostname = False
@@ -37,8 +38,9 @@ def _legacy_ssl_context() -> ssl.SSLContext:
     return ctx
 
 
-def _request(method: str, path: str, read_timeout: float | None = 5,
-             json_body: Any | None = None) -> tuple[bool, Any | None]:
+def _request(
+    method: str, path: str, read_timeout: float | None = 5, json_body: Any | None = None
+) -> tuple[bool, Any | None]:
     try:
         with httpx.Client(
             verify=_legacy_ssl_context(),
@@ -52,7 +54,9 @@ def _request(method: str, path: str, read_timeout: float | None = 5,
         logger.error(f"Request failed: {method} {BASE_URL}{path}")
         return False, None
     if not r.is_success:
-        logger.debug(f"Request not successful: {method} {BASE_URL}{path}, status: {r.status_code}")
+        logger.debug(
+            f"Request not successful: {method} {BASE_URL}{path}, status: {r.status_code}"
+        )
         return False, None
     try:
         return True, r.json()
@@ -76,12 +80,13 @@ def fetch_wifi_networks() -> list[dict[str, Any]] | None:
     data = _get_json("/wifi_networks", None)
     return data if isinstance(data, list) else None
 
-class Gen23ApPoller(QObject):
-    infoReceived = Signal(dict)   # robot answered: user is on its wifi
-    requestFailed = Signal()      # a check failed (timer keeps running)
 
-    _done = Signal(object)        # worker thread -> GUI thread
-    networksReceived = Signal(list)   # [{"ssid": str, "strength": int}, ...]
+class Gen23ApPoller(QObject):
+    infoReceived = Signal(dict)  # robot answered: user is on its wifi
+    requestFailed = Signal()  # a check failed (timer keeps running)
+
+    _done = Signal(object)  # worker thread -> GUI thread
+    networksReceived = Signal(list)  # [{"ssid": str, "strength": int}, ...]
     networksFailed = Signal()
     _networks_done = Signal(object)
 
@@ -93,7 +98,6 @@ class Gen23ApPoller(QObject):
         self._busy = False
         self._done.connect(self._on_done)
         self._networks_done.connect(self._on_networks_done)
-
 
     def fetch_networks(self) -> None:
         threading.Thread(
@@ -123,7 +127,9 @@ class Gen23ApPoller(QObject):
         if self._busy:
             return
         self._busy = True
-        threading.Thread(target=lambda: self._done.emit(fetch_info()), daemon=True).start()
+        threading.Thread(
+            target=lambda: self._done.emit(fetch_info()), daemon=True
+        ).start()
 
     def _on_done(self, info: object) -> None:
         self._busy = False

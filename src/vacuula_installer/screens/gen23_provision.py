@@ -1,4 +1,5 @@
 """4-step checklist shown while the robot joins wifi and the cloud."""
+
 from __future__ import annotations
 
 from PySide6.QtCore import QMargins, Qt
@@ -15,7 +16,12 @@ from PySide6.QtWidgets import (
 from vacuula_installer.i18n import Translator
 from vacuula_installer.widgets.spinner import SpinnerWidget
 
-STEP_KEYS = ("provision.gen23.step1", "provision.gen23.step2", "provision.gen23.step3", "provision.gen23.step4")
+STEP_KEYS = (
+    "provision.gen23.step1",
+    "provision.gen23.step2",
+    "provision.gen23.step3",
+    "provision.gen23.step4",
+)
 
 
 class Gen23ProvisionScreen(QWidget):
@@ -114,7 +120,7 @@ class Gen23ProvisionScreen(QWidget):
         self._retranslate()
         self.reset()
 
-    def resizeEvent(self, event) -> None:  # noqa: N802
+    def resizeEvent(self, event) -> None:
         super().resizeEvent(event)
         self._reposition_log_toggle()
 
@@ -139,7 +145,9 @@ class Gen23ProvisionScreen(QWidget):
         self._update_log_toggle_text()
 
     def _update_log_toggle_text(self) -> None:
-        tip_key = "provision.gen23.log.hide" if self._log_open else "provision.gen23.log.show"
+        tip_key = (
+            "provision.gen23.log.hide" if self._log_open else "provision.gen23.log.show"
+        )
         self._log_toggle.setToolTip(self._translator.tr(tip_key))
 
     # reset() should also clear these:

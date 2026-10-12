@@ -7,6 +7,7 @@ constants.py -- no other code changes required.
 NOTE: If strings are added, increment strings version!
 Higest strings version language file is the one to translate from, keep it english ja?
 """
+
 from __future__ import annotations
 
 import json

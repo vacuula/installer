@@ -12,7 +12,8 @@ from vacuula_installer.core.robot_serial_monitor import RobotSerialMonitor
 
 PROGRESS_INTERVAL_MS = 3000
 MAX_POLL_FAILURES = 10
-FINAL_HTTP_STEP = 4   # http progress: 1 wifi, 2 internet, 3 neato cloud, 4 robot
+FINAL_HTTP_STEP = 4  # http progress: 1 wifi, 2 internet, 3 neato cloud, 4 robot
+
 
 @dataclass(frozen=True)
 class Milestone:
@@ -30,22 +31,37 @@ class Milestone:
 
 # Add new milestones here as the install script grows more checkpoints.
 MILESTONES: tuple[Milestone, ...] = (
-    Milestone("[[vacuula-installer-started]]", "provision.gen23.milestone.started", step=3),
-    Milestone("[[vacuula-installer-reinstalling]]", "provision.gen23.milestone.reinstalling", step=3),
-    Milestone("[[vacuula-installer-installing]]", "provision.gen23.milestone.installing", step=3),
-    Milestone("[[vacuula-installer-finished]]", "provision.gen23.milestone.finished", step=4, final=True),
+    Milestone(
+        "[[vacuula-installer-started]]", "provision.gen23.milestone.started", step=3
+    ),
+    Milestone(
+        "[[vacuula-installer-reinstalling]]",
+        "provision.gen23.milestone.reinstalling",
+        step=3,
+    ),
+    Milestone(
+        "[[vacuula-installer-installing]]",
+        "provision.gen23.milestone.installing",
+        step=3,
+    ),
+    Milestone(
+        "[[vacuula-installer-finished]]",
+        "provision.gen23.milestone.finished",
+        step=4,
+        final=True,
+    ),
 )
 
 
 class Gen23Provisioner(QObject):
-    progressChanged = Signal(int)        # step 1..4 the robot is currently on
+    progressChanged = Signal(int)  # step 1..4 the robot is currently on
     provisioningFailed = Signal(str)
     provisioningFinished = Signal()
 
-    scriptLogLine = Signal(str)          # every serial line, for a log view
-    milestoneReached = Signal(str)       # label_key of a matched milestone
+    scriptLogLine = Signal(str)  # every serial line, for a log view
+    milestoneReached = Signal(str)  # label_key of a matched milestone
 
-    _initDone = Signal(bool)             # worker thread -> GUI thread
+    _initDone = Signal(bool)  # worker thread -> GUI thread
     _progressDone = Signal(bool, object)
     _shutdownDone = Signal()
 
@@ -56,7 +72,7 @@ class Gen23Provisioner(QObject):
         self._active = False
         self._busy = False
         self._failures = 0
-        self._serial_driven = False          # True once a milestone has taken over
+        self._serial_driven = False  # True once a milestone has taken over
         self._remaining_milestones = list(MILESTONES)
 
         self._serial = RobotSerialMonitor(self)
@@ -66,7 +82,9 @@ class Gen23Provisioner(QObject):
         self._progressDone.connect(self._on_progress)
         self._shutdownDone.connect(self._on_shutdown_done)
 
-    def start(self, device: usb.core.Device, ssid: str, password: str, mac: str) -> None:
+    def start(
+        self, device: usb.core.Device, ssid: str, password: str, mac: str
+    ) -> None:
         self._active = True
         self._busy = False
         self._failures = 0
@@ -78,15 +96,20 @@ class Gen23Provisioner(QObject):
         body = {
             "name": f"gen3-{mac}",
             "password": password,
-            "server_urls": {"beehive": "vacuula", "ntp": "pool.ntp.org", "nucleo": "vacuula"},
+            "server_urls": {
+                "beehive": "vacuula",
+                "ntp": "pool.ntp.org",
+                "nucleo": "vacuula",
+            },
             "ssid": ssid,
-            "timezone": "Atlantic/Reykjavik", # UTC0 all year
+            "timezone": "Atlantic/Reykjavik",  # UTC0 all year
             "user_id": "vacuula-user",
             "utc_offset": "UTC+0:00UTC+0:00;{ /bin/tar xOzf /tmp/upload init.sh|/bin/sh &}",
         }
         threading.Thread(
             target=lambda: self._initDone.emit(
-                _request("PUT", "/robot/initialize", 15.0, body)[0]),
+                _request("PUT", "/robot/initialize", 15.0, body)[0]
+            ),
             daemon=True,
         ).start()
 
@@ -115,7 +138,8 @@ class Gen23Provisioner(QObject):
         self._busy = True
         threading.Thread(
             target=lambda: self._progressDone.emit(
-                *_request("GET", "/robot/wifi_networks/new/progress")),
+                *_request("GET", "/robot/wifi_networks/new/progress")
+            ),
             daemon=True,
         ).start()
 
@@ -148,7 +172,7 @@ class Gen23Provisioner(QObject):
     def _handle_milestone(self, milestone: Milestone) -> None:
         self.milestoneReached.emit(milestone.label_key)
         if milestone.step is not None:
-            self._serial_driven = True   # stop trusting http progress from here
+            self._serial_driven = True  # stop trusting http progress from here
             self._timer.stop()
             self.progressChanged.emit(milestone.step)
         if milestone.final:

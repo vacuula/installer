@@ -37,8 +37,8 @@ MANUAL_CERT_PATH = "/api/cert"
 
 REQUEST_TIMEOUT_S = 3
 
-NOT_FOUND = "not_found"          # nothing answered at that address
-INCOMPATIBLE = "incompatible"    # something answered, but not a usable Vacuula server
+NOT_FOUND = "not_found"  # nothing answered at that address
+INCOMPATIBLE = "incompatible"  # something answered, but not a usable Vacuula server
 
 
 class _ServerCheckError(Exception):
@@ -62,9 +62,10 @@ def _check_server(ip: str, port: int, cert_path: str) -> _ServerDetails:
     logger.debug("Checking server at %s (cert path %s)", base_url, cert_path)
 
     try:
-        cert_response = requests.get(f"{base_url}{cert_path}", timeout=REQUEST_TIMEOUT_S)
+        cert_response = requests.get(
+            f"{base_url}{cert_path}", timeout=REQUEST_TIMEOUT_S
+        )
     except requests.RequestException as exc:
-
         raise _ServerCheckError(NOT_FOUND, f"no answer from {base_url}: {exc}") from exc
 
     if not cert_response.ok:
@@ -73,11 +74,15 @@ def _check_server(ip: str, port: int, cert_path: str) -> _ServerDetails:
         )
     cert = cert_response.text
     if "BEGIN CERTIFICATE" not in cert:
-        raise _ServerCheckError(INCOMPATIBLE, f"{cert_path} did not return a certificate")
+        raise _ServerCheckError(
+            INCOMPATIBLE, f"{cert_path} did not return a certificate"
+        )
 
     logger.debug("Certificate looks valid, fetching server info from /api/server")
     try:
-        server_response = requests.get(f"{base_url}/api/server", timeout=REQUEST_TIMEOUT_S)
+        server_response = requests.get(
+            f"{base_url}/api/server", timeout=REQUEST_TIMEOUT_S
+        )
     except requests.RequestException as exc:
         raise _ServerCheckError(NOT_FOUND, f"/api/server: {exc}") from exc
     logger.debug("/api/server returned HTTP %d", server_response.status_code)
@@ -90,15 +95,19 @@ def _check_server(ip: str, port: int, cert_path: str) -> _ServerDetails:
     except (requests.RequestException, ValueError, KeyError, TypeError) as exc:
         raise _ServerCheckError(INCOMPATIBLE, f"/api/server unusable: {exc}") from exc
 
-    logger.debug("Server at %s:%d is Vacuula v%s (gen4 port %d)", ip, port, version, gen4_port)
-    return _ServerDetails(ip=ip, cert=cert, port=port, gen4_port=gen4_port, version=version)
+    logger.debug(
+        "Server at %s:%d is Vacuula v%s (gen4 port %d)", ip, port, version, gen4_port
+    )
+    return _ServerDetails(
+        ip=ip, cert=cert, port=port, gen4_port=gen4_port, version=version
+    )
 
 
 def _parse_address(text: str) -> tuple[str, int]:
     text = text.strip()
     for prefix in ("http://", "https://"):
         if text.lower().startswith(prefix):
-            text = text[len(prefix):]
+            text = text[len(prefix) :]
     text = text.split("/", 1)[0]
 
     logger.debug("Parsing user-entered address: %r", text)
@@ -139,7 +148,12 @@ class _ServiceListener(ServiceListener):
         # A service can be updated after initially appearing.
         self._resolve(zc, type_, name, "updated")
 
-    def remove_service(self,zc: Zeroconf,type_: str,name: str,) -> None:
+    def remove_service(
+        self,
+        zc: Zeroconf,
+        type_: str,
+        name: str,
+    ) -> None:
         logger.debug("Service removed: %s", name)
 
 
@@ -186,8 +200,16 @@ class _DetectionWorker(QRunnable):
             self.signals.failed.emit(exc.kind)
             return
 
-        logger.info("Vacuula server (v%s) found at %s:%d (gen4 port %d)", details.version, details.ip, details.port, details.gen4_port)
-        self.signals.found.emit(details.ip, details.cert, details.port, details.gen4_port)
+        logger.info(
+            "Vacuula server (v%s) found at %s:%d (gen4 port %d)",
+            details.version,
+            details.ip,
+            details.port,
+            details.gen4_port,
+        )
+        self.signals.found.emit(
+            details.ip, details.cert, details.port, details.gen4_port
+        )
 
     @staticmethod
     def _discover_vacuula() -> ServiceInfo | None:
@@ -231,8 +253,16 @@ class _ManualCheckWorker(QRunnable):
             self.signals.failed.emit(exc.kind)
             return
 
-        logger.info("Vacuula server (v%s) (manual) found at %s:%d (gen4 port %d)", details.version, details.ip, details.port, details.gen4_port)
-        self.signals.found.emit(details.ip, details.cert, details.port, details.gen4_port)
+        logger.info(
+            "Vacuula server (v%s) (manual) found at %s:%d (gen4 port %d)",
+            details.version,
+            details.ip,
+            details.port,
+            details.gen4_port,
+        )
+        self.signals.found.emit(
+            details.ip, details.cert, details.port, details.gen4_port
+        )
 
 
 class ServerDetector(QObject):
@@ -274,7 +304,9 @@ class ServerDetector(QObject):
         worker = _ManualCheckWorker(address)
         self._workers.add(worker)
         worker.signals.found.connect(
-            lambda ip, cert, port, gen4, w=worker: self._on_manual_found(w, ip, cert, port, gen4)
+            lambda ip, cert, port, gen4, w=worker: self._on_manual_found(
+                w, ip, cert, port, gen4
+            )
         )
         worker.signals.failed.connect(
             lambda kind, w=worker: self._on_manual_failed(w, kind)
@@ -290,12 +322,16 @@ class ServerDetector(QObject):
         worker = _DetectionWorker()
         self._workers.add(worker)
         worker.signals.found.connect(
-            lambda ip, cert, port, gen4, w=worker: self._on_found(w, ip, cert, port, gen4)
+            lambda ip, cert, port, gen4, w=worker: self._on_found(
+                w, ip, cert, port, gen4
+            )
         )
         worker.signals.failed.connect(lambda _kind, w=worker: self._on_not_found(w))
         self._pool.start(worker)
 
-    def _on_found(self, worker: QRunnable, ip: str, cert: str, port: int, gen4_port: int) -> None:
+    def _on_found(
+        self, worker: QRunnable, ip: str, cert: str, port: int, gen4_port: int
+    ) -> None:
         self._busy = False
         self._workers.discard(worker)
         if not self._active or self._found:
@@ -308,7 +344,9 @@ class ServerDetector(QObject):
 
     # -- manual ------------------------------------------------------------------
 
-    def _on_manual_found(self, worker: QRunnable, ip: str, cert: str, port: int, gen4_port: int) -> None:
+    def _on_manual_found(
+        self, worker: QRunnable, ip: str, cert: str, port: int, gen4_port: int
+    ) -> None:
         self._manual_busy = False
         self._workers.discard(worker)
         if self._found:
@@ -324,7 +362,9 @@ class ServerDetector(QObject):
 
     # -- shared ------------------------------------------------------------------
 
-    def _finish(self, ip: str, cert: str, port: int, gen4_port: int, *, manual: bool) -> None:
+    def _finish(
+        self, ip: str, cert: str, port: int, gen4_port: int, *, manual: bool
+    ) -> None:
         self._found = True
         self._timer.stop()
         self._active = False

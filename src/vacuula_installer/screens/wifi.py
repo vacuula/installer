@@ -30,9 +30,12 @@ from vacuula_installer.i18n import Translator
 from vacuula_installer.widgets.spinner import SpinnerWidget
 from vacuula_installer.widgets.ssid_input import SsidInput
 from vacuula_installer.widgets.width_tracking_label import WidthTrackingLabel
+
+
 # TODO: the wifi screen maybe should be split one for gen23 and one for gen4, but meh for now
 class WifiScreen(QWidget):
     """Emits :attr:`wifiAdded` with SSID, password"""
+
     _BARS = {1: "▂", 2: "▂▄", 3: "▂▄▆"}
 
     wifiAdded = Signal(str, str)
@@ -99,7 +102,9 @@ class WifiScreen(QWidget):
         self._prewifi_connected_button.setObjectName("continueButton")
         self._prewifi_connected_button.setCursor(Qt.CursorShape.PointingHandCursor)
         self._prewifi_connected_button.clicked.connect(self.prewifiConnectedClicked)
-        layout.addWidget(self._prewifi_connected_button, alignment=Qt.AlignmentFlag.AlignHCenter)
+        layout.addWidget(
+            self._prewifi_connected_button, alignment=Qt.AlignmentFlag.AlignHCenter
+        )
 
         return page
 
@@ -149,7 +154,9 @@ class WifiScreen(QWidget):
 
         self._ssid_inputGen23 = SsidInput(page)
         self._ssid_inputGen23.textChanged.connect(self._update_gen23_continue_enabled)
-        self._ssid_inputGen23.returnPressed.connect(self._ssid_inputGen23.focusNextChild)
+        self._ssid_inputGen23.returnPressed.connect(
+            self._ssid_inputGen23.focusNextChild
+        )
 
         self._wifi_combo_boxGen23.setFixedWidth(350)
         self._ssid_inputGen23.setFixedWidth(350)
@@ -188,7 +195,6 @@ class WifiScreen(QWidget):
             self._handle_wifi_continue_clicked
         )
 
-
         self._wifi_disclaimerGen23 = QLabel(page)
         self._wifi_disclaimerGen23.setObjectName("serversearchDetailLabel")
         self._wifi_disclaimerGen23.setAlignment(Qt.AlignmentFlag.AlignHCenter)
@@ -213,9 +219,7 @@ class WifiScreen(QWidget):
         layout.addWidget(
             self._wifi_combo_boxGen23, alignment=Qt.AlignmentFlag.AlignHCenter
         )
-        layout.addWidget(
-            self._ssid_inputGen23, alignment=Qt.AlignmentFlag.AlignHCenter
-        )
+        layout.addWidget(self._ssid_inputGen23, alignment=Qt.AlignmentFlag.AlignHCenter)
         layout.addLayout(link_row)
         layout.addSpacing(8)
         layout.addWidget(self._password_field_labelGen23)
@@ -334,12 +338,14 @@ class WifiScreen(QWidget):
 
     def _handle_wifi_continue_clicked(self) -> None:
         if self._central_stack.currentWidget() is self._gen23_wifi_page:
-            if self._gen23_loading: # if still loading, don't allow continue
+            if self._gen23_loading:  # if still loading, don't allow continue
                 return
             if self._gen23_manual:
                 if not self._ssid_inputGen23.is_valid():
                     return
-                ssid = self._ssid_inputGen23.toPlainText()  # whitespace is valid SSID content
+                ssid = (
+                    self._ssid_inputGen23.toPlainText()
+                )  # whitespace is valid SSID content
             else:
                 ssid = self._wifi_combo_boxGen23.currentData()
                 if not ssid:
@@ -429,7 +435,7 @@ class WifiScreen(QWidget):
         elif self._gen23_auto_manual:
             self._gen23_auto_manual = False
             self._set_gen23_manual(False)
-        else: 
+        else:
             self._ssid_toggleGen23.setDisabled(False)
         self._update_gen23_continue_enabled()
 
@@ -442,7 +448,9 @@ class WifiScreen(QWidget):
         self._set_gen23_status("wifi.gen23.scan_failed")
 
     def set_gen23_prewifi_page(self, mac: str) -> None:
-        self._prewifi_conn_explGen23.setText(self._translator.tr("wifi.gen23.pre.explanation", mac=mac))
+        self._prewifi_conn_explGen23.setText(
+            self._translator.tr("wifi.gen23.pre.explanation", mac=mac)
+        )
         self._central_stack.setCurrentWidget(self._gen23_prewifi_page)
 
     def set_prewifi_checking(self, checking: bool) -> None:
@@ -473,9 +481,15 @@ class WifiScreen(QWidget):
         self._wifi_disclaimerGen23.setText(self._translator.tr("wifi.gen23.disclaimer"))
         self._wifi_continue_buttonGen23.setText(self._translator.tr("wifi.button"))
 
-        self._prewifi_title_labelGen23.setText(self._translator.tr("wifi.gen23.pre.title"))
-        self._prewifi_disclaimerGen23.setText(self._translator.tr("wifi.gen23.pre.disclaimer"))
-        self._prewifi_connected_button.setText(self._translator.tr("wifi.gen23.pre.try_connection"))
+        self._prewifi_title_labelGen23.setText(
+            self._translator.tr("wifi.gen23.pre.title")
+        )
+        self._prewifi_disclaimerGen23.setText(
+            self._translator.tr("wifi.gen23.pre.disclaimer")
+        )
+        self._prewifi_connected_button.setText(
+            self._translator.tr("wifi.gen23.pre.try_connection")
+        )
 
         self._wifi_title_labelGen23.setContentsMargins(0, 0, 0, 0)
         self._wifi_title_labelGen23.setWordWrap(False)

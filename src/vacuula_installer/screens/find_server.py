@@ -312,10 +312,16 @@ class FindServerScreen(QWidget):
         self._title_label.setText(self._translator.tr("serversearch.title"))
         self._body_label.setText(self._translator.tr("serversearch.body"))
         self._detailinfo_label.setText(self._translator.tr("serversearch.detailinfo"))
-        self._enter_ip_button.setText(self._translator.tr("serversearch.enter_ip_manually"))
+        self._enter_ip_button.setText(
+            self._translator.tr("serversearch.enter_ip_manually")
+        )
         self._reposition_enter_ip_button()
-        self._manual_ip_input.setPlaceholderText(self._translator.tr("serversearch.manual.placeholder"))
-        self._try_connection_button.setText(self._translator.tr("serversearch.manual.try_connection"))
+        self._manual_ip_input.setPlaceholderText(
+            self._translator.tr("serversearch.manual.placeholder")
+        )
+        self._try_connection_button.setText(
+            self._translator.tr("serversearch.manual.try_connection")
+        )
 
         # Part of getting title textwidth as limit for other Qlabels
         self._title_label.setContentsMargins(0, 0, 0, 0)

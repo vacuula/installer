@@ -7,7 +7,6 @@ from PySide6.QtSvgWidgets import QSvgWidget
 from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
-    QPushButton,
     QStackedLayout,
     QVBoxLayout,
     QWidget,
@@ -46,7 +45,7 @@ class ConnectRobotScreen(QWidget):
         self.reset_searching()
 
     # -- page builders -----------------------------------------------------
-    #TODO: Move the enttire thing up slightly
+    # TODO: Move the enttire thing up slightly
     def _build_searching_page(self) -> QWidget:
         page = QWidget(self)
         layout = QVBoxLayout(page)

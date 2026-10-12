@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import sys
 
 if sys.platform != "win32":
@@ -9,16 +10,16 @@ import functools
 import logging
 import os
 import winreg
+from collections.abc import Iterable
 from ctypes import POINTER, c_ubyte, c_uint64, c_ushort, c_void_p, cast, pointer
 from types import SimpleNamespace
-from typing import Iterable
 
 import comtypes
 import comtypes.client
 from comtypes import GUID
 
-from . import OBJECT_FILENAME_PROP, DataSource, MtpDevice, MtpError, ProgressFn, _Source
-from .consts import Operations, Response
+from . import DataSource, MtpDevice, MtpError, ProgressFn, _Source
+from .consts import Response
 
 DEBUG = True
 
@@ -50,9 +51,9 @@ GUID_DEVINTERFACE_WPD = "{6ac27878-a6fa-4155-ba85-f98f491d4f33}"
 
 # WPD_CATEGORY_MTP_EXT_VENDOR_OPERATIONS (commands and properties share it)
 _MTP_EXT = GUID("{4D545058-1A2E-4106-A357-771E0819FC56}")
-_CMD_NO_DATA = 12      # EXECUTE_COMMAND_WITHOUT_DATA_PHASE
-_CMD_DATA_READ = 13    # EXECUTE_COMMAND_WITH_DATA_TO_READ
-_CMD_DATA_WRITE = 14   # EXECUTE_COMMAND_WITH_DATA_TO_WRITE
+_CMD_NO_DATA = 12  # EXECUTE_COMMAND_WITHOUT_DATA_PHASE
+_CMD_DATA_READ = 13  # EXECUTE_COMMAND_WITH_DATA_TO_READ
+_CMD_DATA_WRITE = 14  # EXECUTE_COMMAND_WITH_DATA_TO_WRITE
 _CMD_READ_DATA = 15
 _CMD_WRITE_DATA = 16
 _CMD_END_TRANSFER = 17
@@ -95,11 +96,16 @@ MAX_CHUNK = 1024 * 1024
 # COM plumbing
 # --------------------------------------------------------------------------
 
+
 class _PV(ctypes.Structure):
     """Minimal PROPVARIANT view (VT_UI4 only), same layout as the real one:
     8-byte header, then the value union (16 bytes on 64-bit)."""
+
     _fields_ = [
-        ("vt", c_ushort), ("r1", c_ushort), ("r2", c_ushort), ("r3", c_ushort),
+        ("vt", c_ushort),
+        ("r1", c_ushort),
+        ("r2", c_ushort),
+        ("r3", c_ushort),
         ("val", c_uint64),
     ] + ([("pad", c_uint64)] if ctypes.sizeof(c_void_p) == 8 else [])
 
@@ -120,13 +126,20 @@ def _load() -> SimpleNamespace:
             # app.spec), so the frozen app never has to write comtypes.gen.
             from comtypes.gen import PortableDeviceApiLib as api  # type: ignore
             from comtypes.gen import PortableDeviceTypesLib as types  # type: ignore
+
             _log.debug("using pre-generated comtypes wrappers")
         except ImportError:
             # Dev run (or bundle missing them): generate now.
-            sysdir = os.path.join(os.environ.get("SystemRoot", r"C:\Windows"), "System32")
+            sysdir = os.path.join(
+                os.environ.get("SystemRoot", r"C:\Windows"), "System32"
+            )
             try:
-                api = comtypes.client.GetModule(os.path.join(sysdir, "PortableDeviceApi.dll"))
-                types = comtypes.client.GetModule(os.path.join(sysdir, "PortableDeviceTypes.dll"))
+                api = comtypes.client.GetModule(
+                    os.path.join(sysdir, "PortableDeviceApi.dll")
+                )
+                types = comtypes.client.GetModule(
+                    os.path.join(sysdir, "PortableDeviceTypes.dll")
+                )
             except (OSError, comtypes.COMError) as e:
                 raise MtpError(f"Could not load the WPD type libraries: {e!r}") from e
             _log.debug("generated comtypes wrappers at runtime")
@@ -176,7 +189,11 @@ class _Results:
         def call(key, *args):
             error: Exception | None = None
             for cls in _classes("_tagpropertykey"):
-                k = key if isinstance(key, cls) else _key_as(cls, str(key.fmtid), key.pid)
+                k = (
+                    key
+                    if isinstance(key, cls)
+                    else _key_as(cls, str(key.fmtid), key.pid)
+                )
                 try:
                     return method(k, *args)
                 except ctypes.ArgumentError as e:
@@ -274,10 +291,17 @@ _WPD_INTERFACES_KEY = (
 
 _cfgmgr32 = ctypes.WinDLL("cfgmgr32")
 _cfgmgr32.CM_Get_Device_ID_List_SizeW.argtypes = [
-    POINTER(ctypes.c_ulong), ctypes.c_wchar_p, ctypes.c_ulong]
+    POINTER(ctypes.c_ulong),
+    ctypes.c_wchar_p,
+    ctypes.c_ulong,
+]
 _cfgmgr32.CM_Get_Device_ID_List_SizeW.restype = ctypes.c_ulong
 _cfgmgr32.CM_Get_Device_ID_ListW.argtypes = [
-    ctypes.c_wchar_p, POINTER(ctypes.c_wchar), ctypes.c_ulong, ctypes.c_ulong]
+    ctypes.c_wchar_p,
+    POINTER(ctypes.c_wchar),
+    ctypes.c_ulong,
+    ctypes.c_ulong,
+]
 _cfgmgr32.CM_Get_Device_ID_ListW.restype = ctypes.c_ulong
 
 _CM_GETIDLIST_FILTER_ENUMERATOR = 0x00000001
@@ -291,7 +315,9 @@ def _present_device_ids(enumerator: str = "USB") -> list[str]:
     flags = _CM_GETIDLIST_FILTER_ENUMERATOR | _CM_GETIDLIST_FILTER_PRESENT
     for _ in range(3):  # list can grow between the two calls
         size = ctypes.c_ulong()
-        cr = _cfgmgr32.CM_Get_Device_ID_List_SizeW(ctypes.byref(size), enumerator, flags)
+        cr = _cfgmgr32.CM_Get_Device_ID_List_SizeW(
+            ctypes.byref(size), enumerator, flags
+        )
         if cr != _CR_SUCCESS:
             raise MtpError(f"CM_Get_Device_ID_List_Size failed: {cr:#x}")
         buf = ctypes.create_unicode_buffer(size.value)
@@ -300,7 +326,7 @@ def _present_device_ids(enumerator: str = "USB") -> list[str]:
             continue
         if cr != _CR_SUCCESS:
             raise MtpError(f"CM_Get_Device_ID_List failed: {cr:#x}")
-        return [s for s in buf[:size.value].split("\0") if s]
+        return [s for s in buf[: size.value].split("\0") if s]
     raise MtpError("CM_Get_Device_ID_List kept growing")
 
 
@@ -315,7 +341,7 @@ def present_robot_serials() -> list[str]:
     out = []
     for dev_id in _present_device_ids():
         if dev_id.upper().startswith(prefix):
-            instance = dev_id[len(prefix):]
+            instance = dev_id[len(prefix) :]
             if instance and "&" not in instance:
                 out.append(instance)
     return out
@@ -392,10 +418,15 @@ def _candidate_device_ids(serial: str | None) -> list[str]:
     registered = _registered_wpd_paths()
 
     if serial:
-        found = [p for p, _ in sorted(registered, key=lambda r: not r[1])
-                 if _matches(p, serial, prefix)]
+        found = [
+            p
+            for p, _ in sorted(registered, key=lambda r: not r[1])
+            if _matches(p, serial, prefix)
+        ]
         if prefix:
-            found.append(rf"\\?\usb#{vid_pid}&mi_00#{prefix}&0000#{GUID_DEVINTERFACE_WPD}")
+            found.append(
+                rf"\\?\usb#{vid_pid}&mi_00#{prefix}&0000#{GUID_DEVINTERFACE_WPD}"
+            )
         found.append(rf"\\?\usb#{vid_pid}#{serial.lower()}#{GUID_DEVINTERFACE_WPD}")
     else:
         found = [p for p, present in registered if present]
@@ -409,6 +440,7 @@ def _candidate_device_ids(serial: str | None) -> list[str]:
 # device
 # --------------------------------------------------------------------------
 
+
 class WindowsMtpDevice(MtpDevice):
     def __init__(self, serial: str | None, device_id: str | None = None) -> None:
         # Deliberately NOT calling MtpDevice.__init__: that one needs libusb.
@@ -417,7 +449,9 @@ class WindowsMtpDevice(MtpDevice):
         try:
             candidates = [device_id] if device_id else _candidate_device_ids(serial)
             if not candidates:
-                raise MtpError(f"Robot not found in Windows' device list (serial {serial!r})")
+                raise MtpError(
+                    f"Robot not found in Windows' device list (serial {serial!r})"
+                )
             errors: list[str] = []
             for candidate in candidates:
                 try:
@@ -451,10 +485,14 @@ class WindowsMtpDevice(MtpDevice):
         info.SetUnsignedIntegerValue(_k(_CLIENT, _C_MAJOR), 1)
         info.SetUnsignedIntegerValue(_k(_CLIENT, _C_MINOR), 0)
         info.SetUnsignedIntegerValue(_k(_CLIENT, _C_REVISION), 0)
-        info.SetUnsignedIntegerValue(_k(_CLIENT, _C_SECURITY_QOS), SECURITY_IMPERSONATION)
+        info.SetUnsignedIntegerValue(
+            _k(_CLIENT, _C_SECURITY_QOS), SECURITY_IMPERSONATION
+        )
         info.SetUnsignedIntegerValue(_k(_CLIENT, _C_DESIRED_ACCESS), GENERIC_READ_WRITE)
 
-        dev = comtypes.client.CreateObject(w.api.PortableDevice, interface=w.api.IPortableDevice)
+        dev = comtypes.client.CreateObject(
+            w.api.PortableDevice, interface=w.api.IPortableDevice
+        )
         error: str | None = None
         try:
             dev.Open(device_id, info)
@@ -481,7 +519,7 @@ class WindowsMtpDevice(MtpDevice):
             self._dev = None
             comtypes.CoUninitialize()
 
-    def __enter__(self) -> "WindowsMtpDevice":
+    def __enter__(self) -> WindowsMtpDevice:
         return self
 
     def __exit__(self, *exc) -> None:
@@ -509,15 +547,18 @@ class WindowsMtpDevice(MtpDevice):
             hr = 0
         if hr & 0x80000000:
             try:
-                rc = int(results.GetUnsignedIntegerValue(_k(_MTP_EXT, _P_RESPONSE_CODE)))
+                rc = int(
+                    results.GetUnsignedIntegerValue(_k(_MTP_EXT, _P_RESPONSE_CODE))
+                )
                 detail = f", robot answered {rc:#06x}"
             except comtypes.COMError:
                 detail = ", command never reached the robot"
             raise MtpError(f"WPD driver returned HRESULT {hr:#010x}{detail}")
         return results
 
-    def _begin(self, pid: int, opcode: int, args: list[int],
-               total_size: int | None = None) -> _Results:
+    def _begin(
+        self, pid: int, opcode: int, args: list[int], total_size: int | None = None
+    ) -> _Results:
         values = self._command(pid)
         values.SetUnsignedIntegerValue(_k(_MTP_EXT, _P_OPCODE), opcode)
         values.SetIPortableDevicePropVariantCollectionValue(
@@ -544,7 +585,9 @@ class WindowsMtpDevice(MtpDevice):
         return params
 
     def _end_transfer(self, context: str, opcode: int) -> tuple[int, ...]:
-        return self._response(self._send(self._command(_CMD_END_TRANSFER, context)), opcode)
+        return self._response(
+            self._send(self._command(_CMD_END_TRANSFER, context)), opcode
+        )
 
     def _abort(self, context: str, opcode: int) -> None:
         """Best-effort END_TRANSFER after a failed data phase."""
@@ -566,7 +609,9 @@ class WindowsMtpDevice(MtpDevice):
         values.SetUnsignedIntegerValue(_k(_MTP_EXT, _P_BYTES_TO_WRITE), len(part))
         buf = (c_ubyte * len(part)).from_buffer_copy(part)
         values.SetBufferValue(_k(_MTP_EXT, _P_DATA), buf, len(part))
-        return int(self._send(values).GetUnsignedIntegerValue(_k(_MTP_EXT, _P_BYTES_WRITTEN)))
+        return int(
+            self._send(values).GetUnsignedIntegerValue(_k(_MTP_EXT, _P_BYTES_WRITTEN))
+        )
 
     def _read_chunk(self, context: str, want: int) -> bytes:
         values = self._command(_CMD_READ_DATA, context)
@@ -605,7 +650,7 @@ class WindowsMtpDevice(MtpDevice):
         try:
             sent = 0
             while sent < len(data):
-                written = self._write_chunk(context, data[sent:sent + chunk])
+                written = self._write_chunk(context, data[sent : sent + chunk])
                 if written <= 0:
                     raise MtpError(f"WPD wrote 0 bytes at offset {sent}")
                 sent += written
@@ -614,8 +659,13 @@ class WindowsMtpDevice(MtpDevice):
             raise
         return self._end_transfer(context, code)
 
-    def _tx_data_out_stream(self, code: int, args: Iterable[int], data: DataSource,
-                            progress: ProgressFn | None = None) -> tuple:
+    def _tx_data_out_stream(
+        self,
+        code: int,
+        args: Iterable[int],
+        data: DataSource,
+        progress: ProgressFn | None = None,
+    ) -> tuple:
         args = list(args)
         with _Source(data) as src:
             _dbg(f"op {code:#06x} args={_hex_args(args)} data out: {src.size} bytes")

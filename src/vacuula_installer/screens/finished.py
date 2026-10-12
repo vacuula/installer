@@ -34,9 +34,12 @@ class LinkButtonSpec:
 LINK_BUTTONS: tuple[LinkButtonSpec, ...] = (
     LinkButtonSpec(GITHUB_SVG, "Discord", "https://discord.gg/PAgwhWvyD8"),
     LinkButtonSpec(DISCORD_SVG, "Github", "https://github.com/vacuula/vacuula"),
-    LinkButtonSpec(BUYMEACOFFEE_SVG, "Buy Me a Coffee", "https://www.buymeacoffee.com/philip2809"),
+    LinkButtonSpec(
+        BUYMEACOFFEE_SVG, "Buy Me a Coffee", "https://www.buymeacoffee.com/philip2809"
+    ),
     LinkButtonSpec(KOFI_SVG, "Ko-Fi", "https://ko-fi.com/V7V61PBIY6"),
 )
+
 
 class CircleLinkButton(QPushButton):
     """A round, outlined button with a centered svg icon. Click opens `url`
@@ -84,9 +87,7 @@ class FinishedScreen(QWidget):
 
         self._icon_label = QLabel("🎉", self)
         self._icon_label.setObjectName("errorIconLabel")
-        self._icon_label.setStyleSheet(
-            "font-size: 45px;"
-        )
+        self._icon_label.setStyleSheet("font-size: 45px;")
         self._icon_label.setAlignment(Qt.AlignmentFlag.AlignHCenter)
 
         self._finished_title = QLabel(self)

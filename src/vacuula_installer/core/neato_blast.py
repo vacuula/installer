@@ -9,7 +9,6 @@ import argparse
 import logging
 import os
 import struct
-import sys
 import time
 from collections.abc import Callable
 
@@ -21,42 +20,50 @@ except ImportError:
     serial = None
 
 
-REQ = 0x05   # robot is ready to receive the blast
-ACK = 0x06   # block accepted / upload accepted
-NAK = 0x15   # upload rejected
+REQ = 0x05  # robot is ready to receive the blast
+ACK = 0x06  # block accepted / upload accepted
+NAK = 0x15  # upload rejected
 
 BAUD = 115200
 
-ONESHOT_CHUNK = 1024      # SendFile()      write granularity
-ONESHOT_DELAY = 0.003     # SendFile()      Sleep(3) between writes
+ONESHOT_CHUNK = 1024  # SendFile()      write granularity
+ONESHOT_DELAY = 0.003  # SendFile()      Sleep(3) between writes
 
-ACK_CHUNK = 512           # SendFileBlocks() write granularity
-ACK_BLOCK = 16 * 1024     # SendFileBlocks() bytes between ACKs
-ACK_RETRIES = 5           # tries before giving up on an ACK
-ACK_RETRY_DELAY = 1.0     # Sleep(1000) between tries
+ACK_CHUNK = 512  # SendFileBlocks() write granularity
+ACK_BLOCK = 16 * 1024  # SendFileBlocks() bytes between ACKs
+ACK_RETRIES = 5  # tries before giving up on an ACK
+ACK_RETRY_DELAY = 1.0  # Sleep(1000) between tries
 
-READ_WINDOW = 0.1         # Serial::Read() drains RX for ~100 ms
-REQ_POLLS = 15            # Upload() polls 15 times for REQ
-FINAL_TIMEOUT = 10.0      # GetTickCount() delta of 0x2710 after the blast
+READ_WINDOW = 0.1  # Serial::Read() drains RX for ~100 ms
+REQ_POLLS = 15  # Upload() polls 15 times for REQ
+FINAL_TIMEOUT = 10.0  # GetTickCount() delta of 0x2710 after the blast
 NO_HANDSHAKE_DELAY = 5.0  # Sleep(5000) when -k is used
 
-UPLOAD_TYPES = ("code", "sound", "LDS", "Metadata", "Package",
-                "Tarball", "Image", "mainboard")
+UPLOAD_TYPES = (
+    "code",
+    "sound",
+    "LDS",
+    "Metadata",
+    "Package",
+    "Tarball",
+    "Image",
+    "mainboard",
+)
 
 # Phases reported via `status_callback`, in the order they occur for a
 # normal (handshake=True) upload. A caller only needs to map these to
 # user-facing text; nothing here depends on the exact strings beyond
 # equality, so more can be added without breaking existing callers that
 # only recognize a subset.
-STATUS_HANDSHAKE = "handshake"        # waiting for the robot's REQ
-STATUS_SENDING = "sending"            # the blast itself is in progress
+STATUS_HANDSHAKE = "handshake"  # waiting for the robot's REQ
+STATUS_SENDING = "sending"  # the blast itself is in progress
 STATUS_AWAITING_ACK = "awaiting_ack"  # blast done, waiting for ACK/NAK
-STATUS_VERIFYING = "verifying"        # running `updatesw verify`
-STATUS_REBOOTING = "rebooting"        # robot asked to reboot
+STATUS_VERIFYING = "verifying"  # running `updatesw verify`
+STATUS_REBOOTING = "rebooting"  # robot asked to reboot
 STATUS_DONE = "done"
 
 ProgressCallback = Callable[[int, int], None]  # (bytes_sent, total_bytes)
-StatusCallback = Callable[[str], None]         # (one of the STATUS_* constants)
+StatusCallback = Callable[[str], None]  # (one of the STATUS_* constants)
 
 
 def blast_checksum(data: bytes) -> int:
@@ -72,8 +79,9 @@ def patch_app_size(data: bytes, app_size: int) -> bytes:
     read came back shorter than 24 bytes.
     """
     if len(data) < 24:
-        raise ValueError("cannot replace application size at byte 20: "
-                         "file is shorter than 24 bytes")
+        raise ValueError(
+            "cannot replace application size at byte 20: file is shorter than 24 bytes"
+        )
     return data[:20] + struct.pack("<I", app_size) + data[24:]
 
 
@@ -90,13 +98,13 @@ class NeatoRobot:
             bytesize=serial.EIGHTBITS,
             parity=serial.PARITY_NONE,
             stopbits=serial.STOPBITS_ONE,
-            timeout=0,          # non-blocking; we do our own timing windows
+            timeout=0,  # non-blocking; we do our own timing windows
             write_timeout=None,
             rtscts=False,
             dsrdtr=False,
             xonxoff=False,
         )
-        self.ser.dtr = True     # EscapeCommFunction(SETDTR) in Serial::Open()
+        self.ser.dtr = True  # EscapeCommFunction(SETDTR) in Serial::Open()
 
     # -- plumbing ----------------------------------------------------------
 
@@ -130,10 +138,14 @@ class NeatoRobot:
                 time.sleep(0.002)
         return bytes(out)
 
-    def wait_for(self, byte_value: int, polls: int,
-                 window: float = READ_WINDOW,
-                 gap: float = 0.0,
-                 accumulate: bool = True) -> bytes:
+    def wait_for(
+        self,
+        byte_value: int,
+        polls: int,
+        window: float = READ_WINDOW,
+        gap: float = 0.0,
+        accumulate: bool = True,
+    ) -> bytes:
         """Poll until `byte_value` shows up. Returns everything received.
 
         Raises TimeoutError once `polls` polls have gone by without it.
@@ -150,13 +162,14 @@ class NeatoRobot:
             if gap:
                 time.sleep(gap)
         raise TimeoutError(
-            f"timed out waiting for 0x{byte_value:02X}; "
-            f"got {bytes(buf)!r}"
+            f"timed out waiting for 0x{byte_value:02X}; got {bytes(buf)!r}"
         )
 
     # -- the two BLAST variants -------------------------------------------
 
-    def _blast_oneshot(self, data: bytes, progress_callback: ProgressCallback | None = None) -> None:
+    def _blast_oneshot(
+        self, data: bytes, progress_callback: ProgressCallback | None = None
+    ) -> None:
         """SendFile() @ 0x0041FF50 -- fire and forget."""
         total = len(data)
         blocks = (total + 1023) // 1024
@@ -164,7 +177,7 @@ class NeatoRobot:
         sent = 0
         n = 0
         for off in range(0, total, ONESHOT_CHUNK):
-            chunk = data[off:off + ONESHOT_CHUNK]
+            chunk = data[off : off + ONESHOT_CHUNK]
             self.ser.write(chunk)
             time.sleep(ONESHOT_DELAY)
             sent += len(chunk)
@@ -178,14 +191,16 @@ class NeatoRobot:
                 progress_callback(sent, total)
         self.ser.flush()
 
-    def _blast_with_ack(self, data: bytes, progress_callback: ProgressCallback | None = None) -> None:
+    def _blast_with_ack(
+        self, data: bytes, progress_callback: ProgressCallback | None = None
+    ) -> None:
         """SendFileBlocks() @ 0x00420450 -- ACK after every 16 KiB."""
         total = len(data)
         off = 0
         remaining_in_block = ACK_BLOCK
         while off < total:
             take = min(ACK_CHUNK, remaining_in_block, total - off)
-            self.ser.write(data[off:off + take])
+            self.ser.write(data[off : off + take])
             off += take
             remaining_in_block -= take
             if progress_callback is not None:
@@ -204,24 +219,25 @@ class NeatoRobot:
             if ACK in resp:
                 return
             time.sleep(ACK_RETRY_DELAY)
-        raise TimeoutError(
-            "Timeout waiting for ACK handshake during blast from robot")
+        raise TimeoutError("Timeout waiting for ACK handshake during blast from robot")
 
     # -- the whole transaction --------------------------------------------
 
-    def upload(self,
-               path: str,
-               kind: str = "code",
-               reboot: bool = False,
-               readflash: bool = False,
-               noburn: bool = False,
-               xmodem: bool = False,
-               handshake: bool = True,
-               blast_ack: bool = False,
-               updatesw_verify: bool = False,
-               has_mainboard_version: bool = True,
-               progress_callback: ProgressCallback | None = None,
-               status_callback: StatusCallback | None = None) -> bool:
+    def upload(
+        self,
+        path: str,
+        kind: str = "code",
+        reboot: bool = False,
+        readflash: bool = False,
+        noburn: bool = False,
+        xmodem: bool = False,
+        handshake: bool = True,
+        blast_ack: bool = False,
+        updatesw_verify: bool = False,
+        has_mainboard_version: bool = True,
+        progress_callback: ProgressCallback | None = None,
+        status_callback: StatusCallback | None = None,
+    ) -> bool:
         """Run one full upload. Returns True on ACK, False on NAK.
 
         `progress_callback(bytes_sent, total_bytes)` fires repeatedly while
@@ -297,7 +313,7 @@ class NeatoRobot:
 
         # 5. verdict
         if not handshake:
-            self.send_command("")          # bare newline
+            self.send_command("")  # bare newline
             self._log("Upload sent to robot.")
             _status(STATUS_DONE)
             return True
@@ -316,8 +332,10 @@ class NeatoRobot:
                 self._log("Robot Reported Upload failed.")
                 return False
         else:
-            raise TimeoutError("Timeout waiting for ACK/NAK handshake "
-                               "character from robot after upload.")
+            raise TimeoutError(
+                "Timeout waiting for ACK/NAK handshake "
+                "character from robot after upload."
+            )
 
         if ok and updatesw_verify:
             _status(STATUS_VERIFYING)
@@ -326,8 +344,9 @@ class NeatoRobot:
 
         if reboot:
             _status(STATUS_REBOOTING)
-            self._log("Robot reboot requested ... "
-                      "close serial port and wait 10 seconds ...")
+            self._log(
+                "Robot reboot requested ... close serial port and wait 10 seconds ..."
+            )
             self.close()
             time.sleep(10)
 
@@ -374,6 +393,7 @@ def upload_file(
             robot.close()
         except Exception:
             pass
+
 
 # terminal app
 def main(argv=None) -> int:

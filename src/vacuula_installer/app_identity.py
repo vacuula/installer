@@ -27,7 +27,6 @@ def prepare_app_identity() -> None:
     QCoreApplication.setOrganizationName(ORG_NAME)
     QGuiApplication.setDesktopFileName(APP_ID)
 
-
     if sys.platform == "win32":
         _set_windows_app_user_model_id()
 

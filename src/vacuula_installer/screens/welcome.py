@@ -23,14 +23,13 @@ class WelcomeScreen(QWidget):
         layers.setStackingMode(QStackedLayout.StackingMode.StackAll)
 
         self._flair = BackgroundFlairWidget(self)
-        
-        layers.addWidget(self._flair)
 
+        layers.addWidget(self._flair)
 
         foreground = QWidget(self)
         foreground.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
         fg_layout = QVBoxLayout(foreground)
-        #fg_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        # fg_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         fg_layout.setSpacing(16)
         fg_layout.setContentsMargins(50, 40, 50, 26)
         fg_layout.setAlignment(Qt.AlignmentFlag.AlignVCenter)
@@ -59,7 +58,6 @@ class WelcomeScreen(QWidget):
         fg_layout.addSpacing(24)
         fg_layout.addWidget(self._helpinfo)
         fg_layout.addStretch(1)
-        
 
         layers.addWidget(foreground)
 

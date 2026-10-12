@@ -1,4 +1,5 @@
 """Fake server if you don't have a real one running or whatever"""
+
 import json
 import socket
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -15,6 +16,7 @@ try:
 finally:
     s.close()
 
+
 class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path == "/api/cert":
@@ -23,12 +25,14 @@ class Handler(BaseHTTPRequestHandler):
             self.do_server()
 
     def do_server(self):
-        data = json.dumps({
-            "version": "1.0.0",
-            "gen4_port": 3443,
-            # "timezone": XXX, - not used by installer
-            # "utc_offset_minutes": XXX, - not used by installer
-        }).encode("utf-8")
+        data = json.dumps(
+            {
+                "version": "1.0.0",
+                "gen4_port": 3443,
+                # "timezone": XXX, - not used by installer
+                # "utc_offset_minutes": XXX, - not used by installer
+            }
+        ).encode("utf-8")
         self.send_response(200)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(data)))
@@ -48,6 +52,7 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(data)
         self.wfile.flush()
+
 
 httpd = HTTPServer(("0.0.0.0", PORT), Handler)
 

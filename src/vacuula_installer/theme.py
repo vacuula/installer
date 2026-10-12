@@ -1,6 +1,6 @@
 """Class containing colours to use, and the stylesheet"""
 
-# Colours chosen based on Vacuula logo + green and blue (ish) which happen to be colours Philip likes 
+# Colours chosen based on Vacuula logo + green and blue (ish) which happen to be colours Philip likes
 # They will need refinement
 
 # Don't question the stylesheet, I know what Im doing™
@@ -282,6 +282,7 @@ QMessageBox, QDialog {{
 }}
 
 """
+
 
 def apply_app_palette(app: QApplication) -> None:
     """Apply the Vacuula palette to the given QApplication."""

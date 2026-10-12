@@ -73,11 +73,11 @@ class DisclaimerScreen(QWidget):
         for key in self._BULLET_KEYS:
             self._add_bullet_row(block_layout, key)
         self._acknowledge_checkbox, self._acknowledge_caption = (
-            self._add_acknowledge_row(block_layout,4 )
+            self._add_acknowledge_row(block_layout, 4)
         )
-        self._warning_checkbox, self._warning_caption = (
-                    self._add_acknowledge_row(block_layout, 6)
-                )
+        self._warning_checkbox, self._warning_caption = self._add_acknowledge_row(
+            block_layout, 6
+        )
 
         self._understand_button = QPushButton(self)
         self._understand_button.setObjectName("understandButton")
@@ -133,7 +133,9 @@ class DisclaimerScreen(QWidget):
         layout.addLayout(row)
         self._bullets.append((key, text))
 
-    def _add_acknowledge_row(self, layout: QVBoxLayout, position) -> tuple[QCheckBox, QLabel]:
+    def _add_acknowledge_row(
+        self, layout: QVBoxLayout, position
+    ) -> tuple[QCheckBox, QLabel]:
         # QCheckBox only draws plain text, so the caption is a QLabel instead
         # (rich text + word wrap like the bullets); clicking it toggles the box.
         checkbox = QCheckBox(self._bullet_block)
@@ -193,7 +195,9 @@ class DisclaimerScreen(QWidget):
         # Checkbox centred on the first text line, whichever of the two is taller.
         line = caption.fontMetrics().height()
         checkbox.setMinimumHeight(line)
-        caption.setContentsMargins(0, max(0, (checkbox.sizeHint().height() - line) // 2), 0, 0)
+        caption.setContentsMargins(
+            0, max(0, (checkbox.sizeHint().height() - line) // 2), 0, 0
+        )
 
     def showEvent(self, event: QShowEvent) -> None:
         # A stylesheet inherited from the parent window only applies once the
