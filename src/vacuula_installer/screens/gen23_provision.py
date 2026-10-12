@@ -3,25 +3,12 @@
 from __future__ import annotations
 
 from PySide6.QtCore import QMargins, Qt
-from PySide6.QtWidgets import (
-    QGridLayout,
-    QHBoxLayout,
-    QLabel,
-    QPlainTextEdit,
-    QPushButton,
-    QVBoxLayout,
-    QWidget,
-)
+from PySide6.QtWidgets import QGridLayout, QHBoxLayout, QLabel, QPlainTextEdit, QPushButton, QVBoxLayout, QWidget
 
 from vacuula_installer.i18n import Translator
 from vacuula_installer.widgets.spinner import SpinnerWidget
 
-STEP_KEYS = (
-    "provision.gen23.step1",
-    "provision.gen23.step2",
-    "provision.gen23.step3",
-    "provision.gen23.step4",
-)
+STEP_KEYS = ("provision.gen23.step1", "provision.gen23.step2", "provision.gen23.step3", "provision.gen23.step4")
 
 
 class Gen23ProvisionScreen(QWidget):
@@ -145,9 +132,7 @@ class Gen23ProvisionScreen(QWidget):
         self._update_log_toggle_text()
 
     def _update_log_toggle_text(self) -> None:
-        tip_key = (
-            "provision.gen23.log.hide" if self._log_open else "provision.gen23.log.show"
-        )
+        tip_key = "provision.gen23.log.hide" if self._log_open else "provision.gen23.log.show"
         self._log_toggle.setToolTip(self._translator.tr(tip_key))
 
     # reset() should also clear these:
@@ -168,10 +153,7 @@ class Gen23ProvisionScreen(QWidget):
         it gets the spinner, everything after it is an empty circle."""
         self._step = step
         current = step - 1
-        self._render(
-            done_up_to=current,
-            spinning=current if current < len(STEP_KEYS) else None,
-        )
+        self._render(done_up_to=current, spinning=current if current < len(STEP_KEYS) else None)
 
     def set_all_done(self) -> None:
         self._render(done_up_to=len(STEP_KEYS))

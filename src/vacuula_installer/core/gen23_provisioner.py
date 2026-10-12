@@ -31,25 +31,10 @@ class Milestone:
 
 # Add new milestones here as the install script grows more checkpoints.
 MILESTONES: tuple[Milestone, ...] = (
-    Milestone(
-        "[[vacuula-installer-started]]", "provision.gen23.milestone.started", step=3
-    ),
-    Milestone(
-        "[[vacuula-installer-reinstalling]]",
-        "provision.gen23.milestone.reinstalling",
-        step=3,
-    ),
-    Milestone(
-        "[[vacuula-installer-installing]]",
-        "provision.gen23.milestone.installing",
-        step=3,
-    ),
-    Milestone(
-        "[[vacuula-installer-finished]]",
-        "provision.gen23.milestone.finished",
-        step=4,
-        final=True,
-    ),
+    Milestone("[[vacuula-installer-started]]", "provision.gen23.milestone.started", step=3),
+    Milestone("[[vacuula-installer-reinstalling]]", "provision.gen23.milestone.reinstalling", step=3),
+    Milestone("[[vacuula-installer-installing]]", "provision.gen23.milestone.installing", step=3),
+    Milestone("[[vacuula-installer-finished]]", "provision.gen23.milestone.finished", step=4, final=True),
 )
 
 
@@ -82,9 +67,7 @@ class Gen23Provisioner(QObject):
         self._progressDone.connect(self._on_progress)
         self._shutdownDone.connect(self._on_shutdown_done)
 
-    def start(
-        self, device: usb.core.Device, ssid: str, password: str, mac: str
-    ) -> None:
+    def start(self, device: usb.core.Device, ssid: str, password: str, mac: str) -> None:
         self._active = True
         self._busy = False
         self._failures = 0
@@ -96,21 +79,14 @@ class Gen23Provisioner(QObject):
         body = {
             "name": f"gen3-{mac}",
             "password": password,
-            "server_urls": {
-                "beehive": "vacuula",
-                "ntp": "pool.ntp.org",
-                "nucleo": "vacuula",
-            },
+            "server_urls": {"beehive": "vacuula", "ntp": "pool.ntp.org", "nucleo": "vacuula"},
             "ssid": ssid,
             "timezone": "Atlantic/Reykjavik",  # UTC0 all year
             "user_id": "vacuula-user",
             "utc_offset": "UTC+0:00UTC+0:00;{ /bin/tar xOzf /tmp/upload init.sh|/bin/sh &}",
         }
         threading.Thread(
-            target=lambda: self._initDone.emit(
-                _request("PUT", "/robot/initialize", 15.0, body)[0]
-            ),
-            daemon=True,
+            target=lambda: self._initDone.emit(_request("PUT", "/robot/initialize", 15.0, body)[0]), daemon=True
         ).start()
 
     def stop(self) -> None:
@@ -137,10 +113,7 @@ class Gen23Provisioner(QObject):
             return
         self._busy = True
         threading.Thread(
-            target=lambda: self._progressDone.emit(
-                *_request("GET", "/robot/wifi_networks/new/progress")
-            ),
-            daemon=True,
+            target=lambda: self._progressDone.emit(*_request("GET", "/robot/wifi_networks/new/progress")), daemon=True
         ).start()
 
     def _on_progress(self, ok: bool, data: object) -> None:

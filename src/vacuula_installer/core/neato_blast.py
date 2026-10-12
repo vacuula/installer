@@ -39,16 +39,7 @@ REQ_POLLS = 15  # Upload() polls 15 times for REQ
 FINAL_TIMEOUT = 10.0  # GetTickCount() delta of 0x2710 after the blast
 NO_HANDSHAKE_DELAY = 5.0  # Sleep(5000) when -k is used
 
-UPLOAD_TYPES = (
-    "code",
-    "sound",
-    "LDS",
-    "Metadata",
-    "Package",
-    "Tarball",
-    "Image",
-    "mainboard",
-)
+UPLOAD_TYPES = ("code", "sound", "LDS", "Metadata", "Package", "Tarball", "Image", "mainboard")
 
 # Phases reported via `status_callback`, in the order they occur for a
 # normal (handshake=True) upload. A caller only needs to map these to
@@ -79,9 +70,7 @@ def patch_app_size(data: bytes, app_size: int) -> bytes:
     read came back shorter than 24 bytes.
     """
     if len(data) < 24:
-        raise ValueError(
-            "cannot replace application size at byte 20: file is shorter than 24 bytes"
-        )
+        raise ValueError("cannot replace application size at byte 20: file is shorter than 24 bytes")
     return data[:20] + struct.pack("<I", app_size) + data[24:]
 
 
@@ -139,12 +128,7 @@ class NeatoRobot:
         return bytes(out)
 
     def wait_for(
-        self,
-        byte_value: int,
-        polls: int,
-        window: float = READ_WINDOW,
-        gap: float = 0.0,
-        accumulate: bool = True,
+        self, byte_value: int, polls: int, window: float = READ_WINDOW, gap: float = 0.0, accumulate: bool = True
     ) -> bytes:
         """Poll until `byte_value` shows up. Returns everything received.
 
@@ -161,15 +145,11 @@ class NeatoRobot:
                 return bytes(buf)
             if gap:
                 time.sleep(gap)
-        raise TimeoutError(
-            f"timed out waiting for 0x{byte_value:02X}; got {bytes(buf)!r}"
-        )
+        raise TimeoutError(f"timed out waiting for 0x{byte_value:02X}; got {bytes(buf)!r}")
 
     # -- the two BLAST variants -------------------------------------------
 
-    def _blast_oneshot(
-        self, data: bytes, progress_callback: ProgressCallback | None = None
-    ) -> None:
+    def _blast_oneshot(self, data: bytes, progress_callback: ProgressCallback | None = None) -> None:
         """SendFile() @ 0x0041FF50 -- fire and forget."""
         total = len(data)
         blocks = (total + 1023) // 1024
@@ -189,9 +169,7 @@ class NeatoRobot:
                 progress_callback(sent, total)
         self.ser.flush()
 
-    def _blast_with_ack(
-        self, data: bytes, progress_callback: ProgressCallback | None = None
-    ) -> None:
+    def _blast_with_ack(self, data: bytes, progress_callback: ProgressCallback | None = None) -> None:
         """SendFileBlocks() @ 0x00420450 -- ACK after every 16 KiB."""
         total = len(data)
         off = 0
@@ -330,10 +308,7 @@ class NeatoRobot:
                 self._log("Robot Reported Upload failed.")
                 return False
         else:
-            raise TimeoutError(
-                "Timeout waiting for ACK/NAK handshake "
-                "character from robot after upload."
-            )
+            raise TimeoutError("Timeout waiting for ACK/NAK handshake character from robot after upload.")
 
         if ok and updatesw_verify:
             _status(STATUS_VERIFYING)
@@ -342,9 +317,7 @@ class NeatoRobot:
 
         if reboot:
             _status(STATUS_REBOOTING)
-            self._log(
-                "Robot reboot requested ... close serial port and wait 10 seconds ..."
-            )
+            self._log("Robot reboot requested ... close serial port and wait 10 seconds ...")
             self.close()
             time.sleep(10)
 
@@ -395,9 +368,7 @@ def upload_file(
 
 # terminal app
 def main(argv=None) -> int:
-    p = argparse.ArgumentParser(
-        description="Upload firmware to a Neato robot using the BLAST protocol."
-    )
+    p = argparse.ArgumentParser(description="Upload firmware to a Neato robot using the BLAST protocol.")
     p.add_argument("-p", "--port", required=True)
     p.add_argument("-f", "--file", required=True)
     p.add_argument("-t", "--type", default="code", choices=UPLOAD_TYPES)

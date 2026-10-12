@@ -45,10 +45,7 @@ LIBUSB_DLL: Path = DLL_DIR / "libusb-1.0.dll"
 # --------------------------------------------------------------------------
 # Window & layout geometry
 # --------------------------------------------------------------------------
-WINDOW_SIZE: tuple[int, int] = (
-    1040,
-    640,
-)  # I think os will scale this and not take it litteraly
+WINDOW_SIZE: tuple[int, int] = (1040, 640)  # I think os will scale this and not take it litteraly
 LEFT_PANEL_RATIO: float = 0.38  # fraction of the window width
 
 LOGO_SIZE_CENTERED: int = 654  # logo size during the intro splash
@@ -90,15 +87,8 @@ LANGUAGES: dict[str, LanguageMeta] = {
 DEFAULT_LANGUAGE = "en"  # might be replaced with system locale? I dunno how to fetch safely crossplatform
 
 # Backgroundflair, maybe do languages actually translated to?
+# fmt: off
 FLAIR_WELCOME_WORDS: list[str] = [
-    "Welcome",
-    "Willkommen",
-    "Bienvenue",
-    "Bienvenida",
-    "Benvenuto",
-    "Bem-vindo",
-    "いらっしゃいませ",
-    "Välkommen",
-    "Velkommen",
-    "Tervetuloa",
+    "Welcome","Willkommen","Bienvenue","Bienvenida","Benvenuto",
+    "Bem-vindo","いらっしゃいませ","Välkommen","Velkommen","Tervetuloa",
 ]

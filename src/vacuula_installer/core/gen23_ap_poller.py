@@ -43,10 +43,7 @@ def _request(
 ) -> tuple[bool, Any | None]:
     try:
         with httpx.Client(
-            verify=_legacy_ssl_context(),
-            http2=True,
-            timeout=httpx.Timeout(read_timeout, connect=2.0),
-            headers=HEADERS,
+            verify=_legacy_ssl_context(), http2=True, timeout=httpx.Timeout(read_timeout, connect=2.0), headers=HEADERS
         ) as client:
             logger.debug(f"Requesting {method} {BASE_URL}{path}")
             r = client.request(method, f"{BASE_URL}{path}", json=json_body)
@@ -54,9 +51,7 @@ def _request(
         logger.error(f"Request failed: {method} {BASE_URL}{path}")
         return False, None
     if not r.is_success:
-        logger.debug(
-            f"Request not successful: {method} {BASE_URL}{path}, status: {r.status_code}"
-        )
+        logger.debug(f"Request not successful: {method} {BASE_URL}{path}, status: {r.status_code}")
         return False, None
     try:
         return True, r.json()
@@ -100,9 +95,7 @@ class Gen23ApPoller(QObject):
         self._networks_done.connect(self._on_networks_done)
 
     def fetch_networks(self) -> None:
-        threading.Thread(
-            target=lambda: self._networks_done.emit(fetch_wifi_networks()), daemon=True
-        ).start()
+        threading.Thread(target=lambda: self._networks_done.emit(fetch_wifi_networks()), daemon=True).start()
 
     def _on_networks_done(self, networks: object) -> None:
         if networks is None:
@@ -127,9 +120,7 @@ class Gen23ApPoller(QObject):
         if self._busy:
             return
         self._busy = True
-        threading.Thread(
-            target=lambda: self._done.emit(fetch_info()), daemon=True
-        ).start()
+        threading.Thread(target=lambda: self._done.emit(fetch_info()), daemon=True).start()
 
     def _on_done(self, info: object) -> None:
         self._busy = False

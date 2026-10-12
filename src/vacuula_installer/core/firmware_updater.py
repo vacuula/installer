@@ -82,14 +82,9 @@ def _resolve_download(asset: FirmwareAsset) -> tuple[str, dict[str, str]]:
         return asset.url, {}
     if asset.asset_id is not None:
         url = f"https://api.github.com/repos/{GITHUB_REPO}/releases/assets/{asset.asset_id}"
-        headers = {
-            "Authorization": f"Bearer {GITHUB_TOKEN}",
-            "Accept": "application/octet-stream",
-        }
+        headers = {"Authorization": f"Bearer {GITHUB_TOKEN}", "Accept": "application/octet-stream"}
         return url, headers
-    raise ValueError(
-        f"Firmware asset {asset.filename!r} has neither url nor asset_id set"
-    )
+    raise ValueError(f"Firmware asset {asset.filename!r} has neither url nor asset_id set")
 
 
 def firmware_cache_dir() -> Path:
@@ -107,9 +102,7 @@ class FirmwareUpdater(QObject):
     downloadFailed = Signal(str, str)  # key, reason
 
     installStepChanged = Signal(str, str)  # key, step
-    installProgress = Signal(
-        str, int
-    )  # key, percent 0-100 (-1 if unknown total) -- only meaningful during "sending"
+    installProgress = Signal(str, int)  # key, percent 0-100 (-1 if unknown total) -- only meaningful during "sending"
     installFailed = Signal(str, str)  # key, reason
     installFinished = Signal(str)  # key
 
@@ -144,18 +137,14 @@ class FirmwareUpdater(QObject):
 
         stop_event = threading.Event()
         self._active_downloads[key] = stop_event
-        threading.Thread(
-            target=self._download_worker, args=(key, asset, stop_event), daemon=True
-        ).start()
+        threading.Thread(target=self._download_worker, args=(key, asset, stop_event), daemon=True).start()
 
     def cancel_download(self, key: str) -> None:
         stop_event = self._active_downloads.get(key)
         if stop_event is not None:
             stop_event.set()
 
-    def _download_worker(
-        self, key: str, asset: FirmwareAsset, stop_event: threading.Event
-    ) -> None:
+    def _download_worker(self, key: str, asset: FirmwareAsset, stop_event: threading.Event) -> None:
         dest = firmware_cache_dir() / asset.filename
         tmp_path = dest.with_suffix(dest.suffix + ".part")
         try:
@@ -166,11 +155,7 @@ class FirmwareUpdater(QObject):
 
         try:
             with httpx.stream(
-                "GET",
-                url,
-                headers=headers,
-                follow_redirects=True,
-                timeout=DOWNLOAD_TIMEOUT_S,
+                "GET", url, headers=headers, follow_redirects=True, timeout=DOWNLOAD_TIMEOUT_S
             ) as response:
                 if not response.is_success:
                     self._fail_download(key, tmp_path, f"HTTP {response.status_code}")
@@ -194,18 +179,12 @@ class FirmwareUpdater(QObject):
                             self._progress.emit(key, percent)
 
             if total > 0 and received != total:
-                self._fail_download(
-                    key,
-                    tmp_path,
-                    f"Incomplete download: got {received} of {total} bytes",
-                )
+                self._fail_download(key, tmp_path, f"Incomplete download: got {received} of {total} bytes")
                 return
 
             if asset.sha256 is not None and hasher.hexdigest() != asset.sha256.lower():
                 self._fail_download(
-                    key,
-                    tmp_path,
-                    f"Checksum mismatch: expected {asset.sha256}, got {hasher.hexdigest()}",
+                    key, tmp_path, f"Checksum mismatch: expected {asset.sha256}, got {hasher.hexdigest()}"
                 )
                 return
 
@@ -214,9 +193,7 @@ class FirmwareUpdater(QObject):
             self._fail_download(key, tmp_path, str(e))
             return
         except Exception as e:  # noqa: BLE001 -- report instead of dying silently in the thread
-            self._fail_download(
-                key, tmp_path, f"Unexpected error: {type(e).__name__}: {e}"
-            )
+            self._fail_download(key, tmp_path, f"Unexpected error: {type(e).__name__}: {e}")
             return
 
         self._done.emit(key, str(dest))
@@ -235,15 +212,11 @@ class FirmwareUpdater(QObject):
 
     # -- gen3 install ---------------------------------------------------------------
 
-    def start_gen3_update(
-        self, device: usb.core.Device, firmware_key: str, mac: str
-    ) -> None:
+    def start_gen3_update(self, device: usb.core.Device, firmware_key: str, mac: str) -> None:
         stop_event = threading.Event()
         self._active_installs[firmware_key] = stop_event
         threading.Thread(
-            target=self._gen3_install_worker,
-            args=(firmware_key, device, mac, stop_event),
-            daemon=True,
+            target=self._gen3_install_worker, args=(firmware_key, device, mac, stop_event), daemon=True
         ).start()
 
     def cancel_install(self, key: str) -> None:
@@ -251,9 +224,7 @@ class FirmwareUpdater(QObject):
         if stop_event is not None:
             stop_event.set()
 
-    def _gen3_install_worker(
-        self, key: str, device: usb.core.Device, mac: str, stop_event: threading.Event
-    ) -> None:
+    def _gen3_install_worker(self, key: str, device: usb.core.Device, mac: str, stop_event: threading.Event) -> None:
         asset = FIRMWARE_ASSETS.get(key)
         if asset is None:
             self._install_failed.emit(key, "Unknown firmware")
@@ -261,9 +232,7 @@ class FirmwareUpdater(QObject):
 
         file_path = firmware_cache_dir() / asset.filename
         if not file_path.exists():
-            self._install_failed.emit(
-                key, "Firmware file not found on disk -- download it first"
-            )
+            self._install_failed.emit(key, "Firmware file not found on disk -- download it first")
             return
 
         target_serial = RobotDetector._get_serial(device)
@@ -276,19 +245,12 @@ class FirmwareUpdater(QObject):
             self._install_step.emit(key, "reset_network")
             cmd = reset_network_cmd(mac)
             try:
-                RobotDetector.write_cmd_port_wait_terminator(
-                    port, cmd, timeout=RESET_NETWORK_TIMEOUT_S
-                )
+                RobotDetector.write_cmd_port_wait_terminator(port, cmd, timeout=RESET_NETWORK_TIMEOUT_S)
             except TimeoutError:
-                self._install_failed.emit(
-                    key,
-                    "Timed out waiting for the robot to finish resetting its network",
-                )
+                self._install_failed.emit(key, "Timed out waiting for the robot to finish resetting its network")
                 return
             except OSError as e:
-                self._install_failed.emit(
-                    key, f"Could not send network-reset command: {e}"
-                )
+                self._install_failed.emit(key, f"Could not send network-reset command: {e}")
                 return
 
             if stop_event.wait(POST_RESET_SETTLE_S):
@@ -325,15 +287,9 @@ class FirmwareUpdater(QObject):
     def start_gen4_update(self, device: usb.core.Device, firmware_key: str) -> None:
         stop_event = threading.Event()
         self._active_installs[firmware_key] = stop_event
-        threading.Thread(
-            target=self._gen4_install_worker,
-            args=(firmware_key, device, stop_event),
-            daemon=True,
-        ).start()
+        threading.Thread(target=self._gen4_install_worker, args=(firmware_key, device, stop_event), daemon=True).start()
 
-    def _gen4_install_worker(
-        self, key: str, device: usb.core.Device, stop_event: threading.Event
-    ) -> None:
+    def _gen4_install_worker(self, key: str, device: usb.core.Device, stop_event: threading.Event) -> None:
         asset = FIRMWARE_ASSETS.get(key)
         if asset is None:
             self._install_failed.emit(key, "Unknown firmware")
@@ -341,9 +297,7 @@ class FirmwareUpdater(QObject):
 
         file_path = firmware_cache_dir() / asset.filename
         if not file_path.exists():
-            self._install_failed.emit(
-                key, "Firmware file not found on disk -- download it first"
-            )
+            self._install_failed.emit(key, "Firmware file not found on disk -- download it first")
             return
 
         # MTP objects (COM on Windows) must be created, used and closed on
@@ -356,9 +310,7 @@ class FirmwareUpdater(QObject):
                 mtp.open_session(1)
                 storage_ids = mtp.get_storage_ids()
             except Exception as e:  # noqa: BLE001
-                self._install_failed.emit(
-                    key, f"Could not connect to the robot over MTP: {e}"
-                )
+                self._install_failed.emit(key, f"Could not connect to the robot over MTP: {e}")
                 return
             if not storage_ids:
                 self._install_failed.emit(key, "Robot reported no storage")
@@ -377,13 +329,9 @@ class FirmwareUpdater(QObject):
             self._install_step.emit(key, "sending")
             try:
                 # Path, not bytes: the file is streamed in chunks.
-                mtp.send_update_file(
-                    "update.swu", storage_ids[0], file_path, progress=on_progress
-                )
+                mtp.send_update_file("update.swu", storage_ids[0], file_path, progress=on_progress)
             except Exception as e:  # noqa: BLE001
-                self._install_failed.emit(
-                    key, f"Could not send the firmware to the robot: {e}"
-                )
+                self._install_failed.emit(key, f"Could not send the firmware to the robot: {e}")
                 return
         except Exception as e:  # noqa: BLE001 -- report instead of dying silently in the thread
             self._install_failed.emit(key, f"Unexpected error: {type(e).__name__}: {e}")

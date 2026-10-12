@@ -52,9 +52,7 @@ class WelcomeScreen(QWidget):
         fg_layout.addWidget(self._flag_button, alignment=Qt.AlignmentFlag.AlignHCenter)
         fg_layout.addWidget(self._tagline_label)
         fg_layout.addSpacing(10)
-        fg_layout.addWidget(
-            self._continue_button, alignment=Qt.AlignmentFlag.AlignHCenter
-        )
+        fg_layout.addWidget(self._continue_button, alignment=Qt.AlignmentFlag.AlignHCenter)
         fg_layout.addSpacing(24)
         fg_layout.addWidget(self._helpinfo)
         fg_layout.addStretch(1)

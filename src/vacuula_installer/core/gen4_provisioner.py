@@ -59,9 +59,7 @@ class Gen4Provisioner(QObject):
         super().__init__(parent)
         self.vacuula_server = vacuula_server
         self.vacuula_server_ip = vacuula_server_ip
-        self.vacuula_cert = (
-            vacuula_cert.encode() if isinstance(vacuula_cert, str) else vacuula_cert
-        )
+        self.vacuula_cert = vacuula_cert.encode() if isinstance(vacuula_cert, str) else vacuula_cert
         self.wifi_ssid = wifi_ssid
         self.wifi_psk = wifi_psk
         self.gen4_port = gen4_port
@@ -129,9 +127,7 @@ class Gen4Provisioner(QObject):
         mtp.send_file("/home/root/tron/config/vendors.ini", storage_id, new_config)
 
         # install certificate
-        mtp.send_file(
-            "/home/root/tron/config/ssl/vacuula.crt", storage_id, self.vacuula_cert
-        )
+        mtp.send_file("/home/root/tron/config/ssl/vacuula.crt", storage_id, self.vacuula_cert)
 
     def _set_wifi(self, mtp: MtpDevice, storage_id: int) -> None:
         # update Wifi (optional)
@@ -147,9 +143,7 @@ class Gen4Provisioner(QObject):
                     psk="{self.wifi_psk}"
 }}
             """).encode("utf-8")
-        mtp.send_file(
-            "/etc/wpa_supplicant/wpa_supplicant-wlan0.conf", storage_id, wifi_config
-        )
+        mtp.send_file("/etc/wpa_supplicant/wpa_supplicant-wlan0.conf", storage_id, wifi_config)
 
     def _set_hosts(self, mtp: MtpDevice, storage_id: int) -> None:
         # update hosts file if manual ip was used (optional)

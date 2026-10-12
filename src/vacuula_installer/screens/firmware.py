@@ -37,13 +37,7 @@ INSTALL_STEP_KEYS = {
 class _FirmwareOption(QWidget):
     """One selectable row: a radio button, version title, and description."""
 
-    def __init__(
-        self,
-        key: str,
-        asset: FirmwareAsset,
-        translator: Translator,
-        parent: QWidget | None = None,
-    ) -> None:
+    def __init__(self, key: str, asset: FirmwareAsset, translator: Translator, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.key = key
         self._asset = asset
@@ -59,9 +53,7 @@ class _FirmwareOption(QWidget):
         self._desc_label = QLabel(self)
         self._desc_label.setObjectName("serversearchDetailLabel")
         self._desc_label.setWordWrap(True)
-        self._desc_label.setContentsMargins(
-            24, 0, 0, 0
-        )  # line up under the radio's text
+        self._desc_label.setContentsMargins(24, 0, 0, 0)  # line up under the radio's text
         self._desc_label.setCursor(Qt.CursorShape.PointingHandCursor)
 
         layout.addWidget(self.radio)
@@ -70,9 +62,7 @@ class _FirmwareOption(QWidget):
         self._retranslate()
 
     def mouseReleaseEvent(self, event: QMouseEvent) -> None:
-        if event.button() == Qt.MouseButton.LeftButton and self.rect().contains(
-            event.position().toPoint()
-        ):
+        if event.button() == Qt.MouseButton.LeftButton and self.rect().contains(event.position().toPoint()):
             self.radio.setChecked(True)
         super().mouseReleaseEvent(event)
 
@@ -101,9 +91,7 @@ class FirmwareUpdateScreen(QWidget):
         self._options: list[_FirmwareOption] = []
         self._selected_key: str | None = None
         self._downloaded_key: str | None = None
-        self._progress_kind: str | None = (
-            None  # "download" | "install", while on the progress page
-        )
+        self._progress_kind: str | None = None  # "download" | "install", while on the progress page
         self._retry_kind: str | None = None  # which phase a retry should re-attempt
 
         outer = QVBoxLayout(self)
@@ -147,16 +135,10 @@ class FirmwareUpdateScreen(QWidget):
         self._factory_reset_ack_caption.setObjectName("serversearchDetailLabel")
         self._factory_reset_ack_caption.setWordWrap(True)
         self._factory_reset_ack_caption.setCursor(Qt.CursorShape.PointingHandCursor)
-        self._factory_reset_ack_caption.setSizePolicy(
-            QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Minimum
-        )
-        self._factory_reset_ack_caption.clicked.connect(
-            self._factory_reset_ack_checkbox.toggle
-        )
+        self._factory_reset_ack_caption.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Minimum)
+        self._factory_reset_ack_caption.clicked.connect(self._factory_reset_ack_checkbox.toggle)
 
-        ack_row_layout.addWidget(
-            self._factory_reset_ack_checkbox, alignment=Qt.AlignmentFlag.AlignTop
-        )
+        ack_row_layout.addWidget(self._factory_reset_ack_checkbox, alignment=Qt.AlignmentFlag.AlignTop)
         ack_row_layout.addWidget(self._factory_reset_ack_caption, 1)
         outer.addWidget(self._factory_reset_ack_row)
 
@@ -164,12 +146,8 @@ class FirmwareUpdateScreen(QWidget):
         self._factory_reset_link_button.setObjectName("linkButton")
         self._factory_reset_link_button.setFlat(True)
         self._factory_reset_link_button.setCursor(Qt.CursorShape.PointingHandCursor)
-        self._factory_reset_link_button.clicked.connect(
-            lambda: self._show_page("factory_reset")
-        )
-        outer.addWidget(
-            self._factory_reset_link_button, alignment=Qt.AlignmentFlag.AlignHCenter
-        )
+        self._factory_reset_link_button.clicked.connect(lambda: self._show_page("factory_reset"))
+        outer.addWidget(self._factory_reset_link_button, alignment=Qt.AlignmentFlag.AlignHCenter)
 
         self._download_button = QPushButton(self)
         self._download_button.setObjectName("continueButton")
@@ -197,9 +175,7 @@ class FirmwareUpdateScreen(QWidget):
         self._factory_reset_back_button.setFlat(True)
         self._factory_reset_back_button.setCursor(Qt.CursorShape.PointingHandCursor)
         self._factory_reset_back_button.clicked.connect(lambda: self._show_page("pick"))
-        outer.addWidget(
-            self._factory_reset_back_button, alignment=Qt.AlignmentFlag.AlignHCenter
-        )
+        outer.addWidget(self._factory_reset_back_button, alignment=Qt.AlignmentFlag.AlignHCenter)
 
         # it's one less set of spinner/bar/label to keep in sync.
         self._progress_row = QWidget(self)
@@ -218,12 +194,8 @@ class FirmwareUpdateScreen(QWidget):
         self._progress_bar.setFixedHeight(24)
         self._progress_bar.setTextVisible(True)
 
-        progress_layout.addWidget(
-            self._progress_status, alignment=Qt.AlignmentFlag.AlignHCenter
-        )
-        progress_layout.addWidget(
-            self._progress_bar, alignment=Qt.AlignmentFlag.AlignHCenter
-        )
+        progress_layout.addWidget(self._progress_status, alignment=Qt.AlignmentFlag.AlignHCenter)
+        progress_layout.addWidget(self._progress_bar, alignment=Qt.AlignmentFlag.AlignHCenter)
         outer.addWidget(self._progress_row)
 
         # -- error row
@@ -283,9 +255,7 @@ class FirmwareUpdateScreen(QWidget):
             return
         for key, asset in assets_for_gen(self._gen):
             option = _FirmwareOption(key, asset, self._translator, self._options_box)
-            option.radio.toggled.connect(
-                lambda checked, k=key: self._on_option_toggled(k, checked)
-            )
+            option.radio.toggled.connect(lambda checked, k=key: self._on_option_toggled(k, checked))
             self._button_group.addButton(option.radio)
             self._options_layout.addWidget(option)
             self._options.append(option)
@@ -296,11 +266,7 @@ class FirmwareUpdateScreen(QWidget):
             self._update_download_enabled()
 
     def _update_download_enabled(self) -> None:
-        ack_ok = (
-            self._factory_reset_ack_checkbox.isChecked()
-            if self._gen == "gen3"
-            else True
-        )
+        ack_ok = self._factory_reset_ack_checkbox.isChecked() if self._gen == "gen3" else True
         self._download_button.setEnabled(self._selected_key is not None and ack_ok)
 
     def set_download_progress(self, key: str, percent: int) -> None:
@@ -317,9 +283,7 @@ class FirmwareUpdateScreen(QWidget):
     def set_download_failed(self, key: str, reason: str) -> None:
         if key != self._selected_key:
             return
-        self._error_label.setText(
-            self._translator.tr("firmware.download_failed", reason=reason)
-        )
+        self._error_label.setText(self._translator.tr("firmware.download_failed", reason=reason))
         self._retry_kind = "download"
         self._show_page("error")
 
@@ -343,18 +307,14 @@ class FirmwareUpdateScreen(QWidget):
     def set_install_failed(self, key: str, reason: str) -> None:
         if key != self._downloaded_key:
             return
-        self._error_label.setText(
-            self._translator.tr("firmware.install_failed", reason=reason)
-        )
+        self._error_label.setText(self._translator.tr("firmware.install_failed", reason=reason))
         self._retry_kind = "install"
         self._show_page("error")
 
     def set_install_finished(self, key: str) -> None:
         if key != self._downloaded_key:
             return
-        self._progress_status.setText(
-            self._translator.tr(f"firmware.install.step.done.{self._gen}")
-        )
+        self._progress_status.setText(self._translator.tr(f"firmware.install.step.done.{self._gen}"))
         self._progress_status.setFixedHeight(self._progress_status.heightForWidth(350))
         self.page = "done"  # temp hack thing to detect disconnectes
         self._progress_bar.hide()
@@ -368,11 +328,7 @@ class FirmwareUpdateScreen(QWidget):
 
     # -- user actions
     def _on_download_clicked(self) -> None:
-        ack_ok = (
-            self._factory_reset_ack_checkbox.isChecked()
-            if self._gen == "gen3"
-            else True
-        )
+        ack_ok = self._factory_reset_ack_checkbox.isChecked() if self._gen == "gen3" else True
         if self._selected_key is None or not ack_ok:
             return
         self._progress_kind = "download"
@@ -387,13 +343,9 @@ class FirmwareUpdateScreen(QWidget):
         if self._downloaded_key is None:
             return
         self._progress_kind = "install"
-        self._progress_status.setText(
-            self._translator.tr("firmware.install.step.starting")
-        )
+        self._progress_status.setText(self._translator.tr("firmware.install.step.starting"))
         self._progress_status.adjustSize()
-        self._progress_bar.setRange(
-            0, 0
-        )  # indeterminate until "sending" reports real percent
+        self._progress_bar.setRange(0, 0)  # indeterminate until "sending" reports real percent
         self._show_page("progress")
         self.installRequested.emit(self._downloaded_key)
 
@@ -409,9 +361,7 @@ class FirmwareUpdateScreen(QWidget):
         self.page = page
         self._options_box.setVisible(page == "pick")
         self._factory_reset_ack_row.setVisible(page == "pick" and self._gen == "gen3")
-        self._factory_reset_link_button.setVisible(
-            page == "pick" and self._gen == "gen3"
-        )
+        self._factory_reset_link_button.setVisible(page == "pick" and self._gen == "gen3")
         self._download_button.setVisible(page == "pick")
 
         self._factory_reset_explanation.setVisible(page == "factory_reset")
@@ -426,25 +376,15 @@ class FirmwareUpdateScreen(QWidget):
     def _retranslate(self) -> None:
         self._title.setText(self._translator.tr("firmware.title"))
         self._subtitle.setText(self._translator.tr("firmware.subtitle"))
-        self._factory_reset_ack_caption.setText(
-            self._translator.tr("firmware.gen3.factory_reset_ack")
-        )
-        self._factory_reset_link_button.setText(
-            self._translator.tr("firmware.gen3.factory_reset_link")
-        )
+        self._factory_reset_ack_caption.setText(self._translator.tr("firmware.gen3.factory_reset_ack"))
+        self._factory_reset_link_button.setText(self._translator.tr("firmware.gen3.factory_reset_link"))
         self._download_button.setText(self._translator.tr("firmware.download"))
         self._retry_button.setText(self._translator.tr("firmware.try_again"))
         self._install_button.setText(self._translator.tr("firmware.install"))
 
-        self._factory_reset_explanation.setText(
-            self._translator.tr("firmware.gen3.factory_reset.explanation")
-        )
-        self._factory_reset_instructions.setText(
-            self._translator.tr("firmware.gen3.factory_reset.instructions")
-        )
-        self._factory_reset_back_button.setText(
-            self._translator.tr("firmware.gen3.factory_reset.back")
-        )
+        self._factory_reset_explanation.setText(self._translator.tr("firmware.gen3.factory_reset.explanation"))
+        self._factory_reset_instructions.setText(self._translator.tr("firmware.gen3.factory_reset.instructions"))
+        self._factory_reset_back_button.setText(self._translator.tr("firmware.gen3.factory_reset.back"))
 
         for option in self._options:
             option._retranslate()

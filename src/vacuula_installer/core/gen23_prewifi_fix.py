@@ -90,9 +90,7 @@ class Gen23WiFiFixer(QObject):
 
     fixFailed = Signal(str)  # "upload" | "reset"
 
-    _uploadDone = Signal(
-        bool, object, object
-    )  # ok, device, mac -- worker thread -> GUI thread
+    _uploadDone = Signal(bool, object, object)  # ok, device, mac -- worker thread -> GUI thread
     _resetDone = Signal(bool)
 
     def __init__(self, parent: QObject | None = None) -> None:
@@ -111,15 +109,10 @@ class Gen23WiFiFixer(QObject):
         return None
 
     # TODO: resolve port here instead of later on in the code but meh for now, not in initial release
-    def fix_robot(
-        self, device: usb.core.Device, mac: str, session: SessionData
-    ) -> None:
+    def fix_robot(self, device: usb.core.Device, mac: str, session: SessionData) -> None:
         self._active = True
         threading.Thread(
-            target=lambda: self._uploadDone.emit(
-                self._upload_scripts(device, session), device, mac
-            ),
-            daemon=True,
+            target=lambda: self._uploadDone.emit(self._upload_scripts(device, session), device, mac), daemon=True
         ).start()
 
     def stop(self) -> None:
@@ -173,10 +166,7 @@ class Gen23WiFiFixer(QObject):
             self._active = False
             self.fixFailed.emit("error.generic.upload")
             return
-        threading.Thread(
-            target=lambda: self._resetDone.emit(self._reset_network(device, mac)),
-            daemon=True,
-        ).start()
+        threading.Thread(target=lambda: self._resetDone.emit(self._reset_network(device, mac)), daemon=True).start()
 
     # -- reset (worker thread) ---------------------------------------------------
 

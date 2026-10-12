@@ -7,15 +7,7 @@ import math
 from PySide6 import QtGui
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QShowEvent, QTextDocument
-from PySide6.QtWidgets import (
-    QCheckBox,
-    QHBoxLayout,
-    QLabel,
-    QPushButton,
-    QSizePolicy,
-    QVBoxLayout,
-    QWidget,
-)
+from PySide6.QtWidgets import QCheckBox, QHBoxLayout, QLabel, QPushButton, QSizePolicy, QVBoxLayout, QWidget
 
 from vacuula_installer.i18n import Translator
 from vacuula_installer.widgets.clickable_label import ClickableLabel
@@ -62,9 +54,7 @@ class DisclaimerScreen(QWidget):
         # Bullet block: bullet rows plus the acknowledgement checkbox.
         self._bullet_block = QWidget(self)
         self._bullet_block.setObjectName("bulletBlock")
-        self._bullet_block.setSizePolicy(
-            QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Minimum
-        )
+        self._bullet_block.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Minimum)
 
         self._bullets: list[tuple[str, QLabel]] = []  # (translation key, text label)
         block_layout = QVBoxLayout(self._bullet_block)
@@ -72,12 +62,8 @@ class DisclaimerScreen(QWidget):
         block_layout.setSpacing(8)
         for key in self._BULLET_KEYS:
             self._add_bullet_row(block_layout, key)
-        self._acknowledge_checkbox, self._acknowledge_caption = (
-            self._add_acknowledge_row(block_layout, 4)
-        )
-        self._warning_checkbox, self._warning_caption = self._add_acknowledge_row(
-            block_layout, 6
-        )
+        self._acknowledge_checkbox, self._acknowledge_caption = self._add_acknowledge_row(block_layout, 4)
+        self._warning_checkbox, self._warning_caption = self._add_acknowledge_row(block_layout, 6)
 
         self._understand_button = QPushButton(self)
         self._understand_button.setObjectName("understandButton")
@@ -133,9 +119,7 @@ class DisclaimerScreen(QWidget):
         layout.addLayout(row)
         self._bullets.append((key, text))
 
-    def _add_acknowledge_row(
-        self, layout: QVBoxLayout, position
-    ) -> tuple[QCheckBox, QLabel]:
+    def _add_acknowledge_row(self, layout: QVBoxLayout, position) -> tuple[QCheckBox, QLabel]:
         # QCheckBox only draws plain text, so the caption is a QLabel instead
         # (rich text + word wrap like the bullets); clicking it toggles the box.
         checkbox = QCheckBox(self._bullet_block)
@@ -186,18 +170,14 @@ class DisclaimerScreen(QWidget):
         width = 0
         for label, lead in rows:  # lead = marker / checkbox column in front of the text
             lead += self._ROW_SPACING
-            width = max(
-                width, lead + self._wrapped_width(label, self._MAX_BLOCK_WIDTH - lead)
-            )
+            width = max(width, lead + self._wrapped_width(label, self._MAX_BLOCK_WIDTH - lead))
         # +2 px of slack so rounding can never re-wrap the widest line.
         self._bullet_block.setFixedWidth(min(width + 2, self._MAX_BLOCK_WIDTH))
 
         # Checkbox centred on the first text line, whichever of the two is taller.
         line = caption.fontMetrics().height()
         checkbox.setMinimumHeight(line)
-        caption.setContentsMargins(
-            0, max(0, (checkbox.sizeHint().height() - line) // 2), 0, 0
-        )
+        caption.setContentsMargins(0, max(0, (checkbox.sizeHint().height() - line) // 2), 0, 0)
 
     def showEvent(self, event: QShowEvent) -> None:
         # A stylesheet inherited from the parent window only applies once the

@@ -38,8 +38,7 @@ class Translator(QObject):
         if default_language not in self._catalogs:
             available = ", ".join(sorted(self._catalogs)) or "<none>"
             raise ValueError(
-                f"Default language {default_language!r} has no catalog "
-                f"in {locales_dir} (found: {available})"
+                f"Default language {default_language!r} has no catalog in {locales_dir} (found: {available})"
             )
         self._language = default_language
 

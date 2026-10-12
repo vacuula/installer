@@ -8,26 +8,10 @@ install istructions.
 
 from __future__ import annotations
 
-from PySide6.QtCore import (
-    QEasingCurve,
-    QMargins,
-    QParallelAnimationGroup,
-    QRect,
-    Qt,
-    QVariantAnimation,
-    Signal,
-)
+from PySide6.QtCore import QEasingCurve, QMargins, QParallelAnimationGroup, QRect, Qt, QVariantAnimation, Signal
 from PySide6.QtGui import QColor
 from PySide6.QtSvgWidgets import QSvgWidget
-from PySide6.QtWidgets import (
-    QHBoxLayout,
-    QLabel,
-    QLineEdit,
-    QPushButton,
-    QStackedLayout,
-    QVBoxLayout,
-    QWidget,
-)
+from PySide6.QtWidgets import QHBoxLayout, QLabel, QLineEdit, QPushButton, QStackedLayout, QVBoxLayout, QWidget
 
 from vacuula_installer.constants import COMPUTER_SVG, SERVER_SVG
 from vacuula_installer.i18n import Translator
@@ -202,9 +186,7 @@ class FindServerScreen(QWidget):
         self._try_connection_button.setEnabled(True)
         self._enter_ip_button.show()
 
-    def _fade_text_colour(
-        self, label: QLabel, start_hex: str, end_hex: str, duration_ms: int = 1000
-    ):
+    def _fade_text_colour(self, label: QLabel, start_hex: str, end_hex: str, duration_ms: int = 1000):
         anim = QVariantAnimation(parent=label)
         anim.setStartValue(QColor(start_hex))
         anim.setEndValue(QColor(end_hex))
@@ -225,15 +207,9 @@ class FindServerScreen(QWidget):
             "font-size: 32px;"
         )  # Anoyingly 🔗 is bigger than ✕ for a given fontsize.. Empiric match
         self._spinner.stop()
-        self._status_label.setText(
-            self._translator.tr("serversearch.status.found", ip=ip)
-        )
-        color_anim1 = self._fade_text_colour(
-            self._dots_left, PALETTE.text_muted, "#1dd73c", 1300
-        )
-        color_anim2 = self._fade_text_colour(
-            self._dots_right, PALETTE.text_muted, "#1dd73c", 1300
-        )
+        self._status_label.setText(self._translator.tr("serversearch.status.found", ip=ip))
+        color_anim1 = self._fade_text_colour(self._dots_left, PALETTE.text_muted, "#1dd73c", 1300)
+        color_anim2 = self._fade_text_colour(self._dots_right, PALETTE.text_muted, "#1dd73c", 1300)
         group = QParallelAnimationGroup()
         group.addAnimation(color_anim2)
         group.addAnimation(color_anim1)
@@ -276,9 +252,7 @@ class FindServerScreen(QWidget):
         else:
             self._manual_ip_input.setEnabled(True)
             self._try_connection_button.setEnabled(True)
-            self._manual_ip_status_label.setText(
-                message or self._translator.tr("serversearch.manual.failed")
-            )
+            self._manual_ip_status_label.setText(message or self._translator.tr("serversearch.manual.failed"))
             self._manual_ip_status_label.show()
 
     # Part of getting title textwidth as limit for other Qlabels
@@ -301,27 +275,17 @@ class FindServerScreen(QWidget):
     def _wrapped_title_width(self, available: int) -> int:
         """Width of the title's widest line once wrapped to fit `available`."""
         fm = self._title_label.fontMetrics()
-        rect = fm.boundingRect(
-            QRect(0, 0, available, 32767),
-            Qt.TextFlag.TextWordWrap,
-            self._title_label.text(),
-        )
+        rect = fm.boundingRect(QRect(0, 0, available, 32767), Qt.TextFlag.TextWordWrap, self._title_label.text())
         return rect.width()
 
     def _retranslate(self) -> None:
         self._title_label.setText(self._translator.tr("serversearch.title"))
         self._body_label.setText(self._translator.tr("serversearch.body"))
         self._detailinfo_label.setText(self._translator.tr("serversearch.detailinfo"))
-        self._enter_ip_button.setText(
-            self._translator.tr("serversearch.enter_ip_manually")
-        )
+        self._enter_ip_button.setText(self._translator.tr("serversearch.enter_ip_manually"))
         self._reposition_enter_ip_button()
-        self._manual_ip_input.setPlaceholderText(
-            self._translator.tr("serversearch.manual.placeholder")
-        )
-        self._try_connection_button.setText(
-            self._translator.tr("serversearch.manual.try_connection")
-        )
+        self._manual_ip_input.setPlaceholderText(self._translator.tr("serversearch.manual.placeholder"))
+        self._try_connection_button.setText(self._translator.tr("serversearch.manual.try_connection"))
 
         # Part of getting title textwidth as limit for other Qlabels
         self._title_label.setContentsMargins(0, 0, 0, 0)
@@ -331,10 +295,6 @@ class FindServerScreen(QWidget):
         self._apply_label_margins()
 
         if self._server_ip is None:
-            self._status_label.setText(
-                self._translator.tr("serversearch.status.searching")
-            )
+            self._status_label.setText(self._translator.tr("serversearch.status.searching"))
         else:
-            self._status_label.setText(
-                self._translator.tr("serversearch.status.found", ip=self._server_ip)
-            )
+            self._status_label.setText(self._translator.tr("serversearch.status.found", ip=self._server_ip))

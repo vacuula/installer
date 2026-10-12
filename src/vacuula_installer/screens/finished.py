@@ -7,12 +7,7 @@ from PySide6.QtCore import QSize, Qt, QUrl
 from PySide6.QtGui import QColor, QDesktopServices, QIcon
 from PySide6.QtWidgets import QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QWidget
 
-from vacuula_installer.constants import (
-    BUYMEACOFFEE_SVG,
-    DISCORD_SVG,
-    GITHUB_SVG,
-    KOFI_SVG,
-)
+from vacuula_installer.constants import BUYMEACOFFEE_SVG, DISCORD_SVG, GITHUB_SVG, KOFI_SVG
 from vacuula_installer.i18n import Translator
 
 CIRCLE_BUTTON_DIAMETER = 48
@@ -34,9 +29,7 @@ class LinkButtonSpec:
 LINK_BUTTONS: tuple[LinkButtonSpec, ...] = (
     LinkButtonSpec(GITHUB_SVG, "Discord", "https://discord.gg/PAgwhWvyD8"),
     LinkButtonSpec(DISCORD_SVG, "Github", "https://github.com/vacuula/vacuula"),
-    LinkButtonSpec(
-        BUYMEACOFFEE_SVG, "Buy Me a Coffee", "https://www.buymeacoffee.com/philip2809"
-    ),
+    LinkButtonSpec(BUYMEACOFFEE_SVG, "Buy Me a Coffee", "https://www.buymeacoffee.com/philip2809"),
     LinkButtonSpec(KOFI_SVG, "Ko-Fi", "https://ko-fi.com/V7V61PBIY6"),
 )
 
@@ -45,12 +38,7 @@ class CircleLinkButton(QPushButton):
     """A round, outlined button with a centered svg icon. Click opens `url`
     in the system browser; hover shows the translated tooltip."""
 
-    def __init__(
-        self,
-        spec: LinkButtonSpec,
-        translator: Translator,
-        parent: QWidget | None = None,
-    ) -> None:
+    def __init__(self, spec: LinkButtonSpec, translator: Translator, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self._spec = spec
         self._translator = translator

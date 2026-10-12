@@ -90,9 +90,7 @@ class MtpError(ValueError):
     pass
 
 
-def find_mtp_bulk_endpoints(
-    dev: usb.core.Device,
-) -> tuple[usb.core.Endpoint, usb.core.Endpoint]:
+def find_mtp_bulk_endpoints(dev: usb.core.Device) -> tuple[usb.core.Endpoint, usb.core.Endpoint]:
     dev.reset()
     for interface in dev.get_active_configuration():
         if interface.bInterfaceClass != 6:  # PICTURE class (MTP is subclass of PTP)
@@ -100,15 +98,9 @@ def find_mtp_bulk_endpoints(
         ep_in = ep_out = None
         for ep in interface:
             if usb.util.endpoint_type(ep.bmAttributes) == usb.util.ENDPOINT_TYPE_BULK:
-                if (
-                    usb.util.endpoint_direction(ep.bEndpointAddress)
-                    == usb.util.ENDPOINT_IN
-                ):
+                if usb.util.endpoint_direction(ep.bEndpointAddress) == usb.util.ENDPOINT_IN:
                     ep_in = ep
-                elif (
-                    usb.util.endpoint_direction(ep.bEndpointAddress)
-                    == usb.util.ENDPOINT_OUT
-                ):
+                elif usb.util.endpoint_direction(ep.bEndpointAddress) == usb.util.ENDPOINT_OUT:
                     ep_out = ep
         if ep_in is not None and ep_out is not None:
             return ep_in, ep_out
@@ -140,15 +132,13 @@ class MtpDevice:
     def _read_pkt(self, timeout: int | None = None):
         return MTP_PACKET.parse(bytes(self.ep_in.read(self.MAX_BUF, timeout)))
 
-    def _send_data_stream(
-        self, tx_id: int, code: int, src: _Source, progress: ProgressFn | None = None
-    ) -> None:
+    def _send_data_stream(self, tx_id: int, code: int, src: _Source, progress: ProgressFn | None = None) -> None:
         # pyusb populates endpoint attributes dynamically; invisible to the checker.
         # ty: ignore[unresolved-attribute]
         packet = self.ep_out.wMaxPacketSize
         chunk = max(packet, self.WRITE_CHUNK // packet * packet)
         total = 12 + src.size
-        length = min(total, 4294967295)  # MTP >4 GB marker
+        length = min(total, 0xFFFFFFFF)  # MTP >4 GB marker
         header = (
             length.to_bytes(4, "little")
             + int(ContainerType.Data).to_bytes(2, "little")
@@ -174,21 +164,10 @@ class MtpDevice:
 
     def _send_command(self, tx_id: int, code: int, args: Iterable[int]):
         pld = b"".join(arg.to_bytes(4, "little", signed=arg < 0) for arg in args)
-        self._write_pkt(
-            MTP_PACKET(
-                container_type=ContainerType.Command,
-                code=code,
-                tx_id=tx_id,
-                payload=pld,
-            )
-        )
+        self._write_pkt(MTP_PACKET(container_type=ContainerType.Command, code=code, tx_id=tx_id, payload=pld))
 
     def _send_data(self, tx_id: int, code: int, data: bytes):
-        self._write_pkt(
-            MTP_PACKET(
-                container_type=ContainerType.Data, code=code, tx_id=tx_id, payload=data
-            )
-        )
+        self._write_pkt(MTP_PACKET(container_type=ContainerType.Data, code=code, tx_id=tx_id, payload=data))
 
     def _read_data(self) -> bytes:
         data = self._read_pkt()
@@ -203,10 +182,7 @@ class MtpDevice:
         if resp.code != Response.OK:
             raise MtpError(f"Expected OK, got {resp.code}")
         n_params = len(resp.payload) // 4
-        return tuple(
-            int.from_bytes(resp.payload[i * 4 : (i + 1) * 4], "little")
-            for i in range(n_params)
-        )
+        return tuple(int.from_bytes(resp.payload[i * 4 : (i + 1) * 4], "little") for i in range(n_params))
 
     def _tx_no_data(self, code: int, args: Iterable[int]) -> tuple:
         tx_id = self._new_tx_id()
@@ -220,11 +196,7 @@ class MtpDevice:
         return self._read_response()
 
     def _tx_data_out_stream(
-        self,
-        code: int,
-        args: Iterable[int],
-        data: DataSource,
-        progress: ProgressFn | None = None,
+        self, code: int, args: Iterable[int], data: DataSource, progress: ProgressFn | None = None
     ) -> tuple:
         tx_id = self._new_tx_id()
         self._send_command(tx_id, code, args)
@@ -248,14 +220,9 @@ class MtpDevice:
     def get_storage_ids(self):
         _, ids_raw = self._tx_data_in(Operations.GetStorageIDs, [])
         n_ids = int.from_bytes(ids_raw[:4], "little")
-        return [
-            int.from_bytes(ids_raw[4 + i * 4 : 4 + (i + 1) * 4], "little")
-            for i in range(n_ids)
-        ]
+        return [int.from_bytes(ids_raw[4 + i * 4 : 4 + (i + 1) * 4], "little") for i in range(n_ids)]
 
-    def send_object_info(
-        self, target_path: str, storage_id: int, parent_id: int = -1, size: int = 0
-    ) -> int:
+    def send_object_info(self, target_path: str, storage_id: int, parent_id: int = -1, size: int = 0) -> int:
         object_info = (
             bytes.fromhex(
                 "01 00 ff ff"  # StorageID
@@ -285,9 +252,7 @@ class MtpDevice:
                 "00"  # Keywords
             )
         )
-        ids = self._tx_data_out(
-            Operations.SendObjectInfo, [storage_id, parent_id], object_info
-        )
+        ids = self._tx_data_out(Operations.SendObjectInfo, [storage_id, parent_id], object_info)
         storage_id, _parent_handle, newfile_handle = ids
         return newfile_handle
 
@@ -300,13 +265,7 @@ class MtpDevice:
     def set_object_prop_value(self, filehandle: int, prop: int, new_value: bytes):
         self._tx_data_out(Operations.SetObjectPropValue, [filehandle, prop], new_value)
 
-    def send_update_file(
-        self,
-        target_path: str,
-        storage_id: int,
-        data: DataSource,
-        progress: ProgressFn | None = None,
-    ):
+    def send_update_file(self, target_path: str, storage_id: int, data: DataSource, progress: ProgressFn | None = None):
         with _Source(data) as src:
             staging_path = f"{target_path}.swu"
             file_handle = self.send_object_info(staging_path, storage_id, size=src.size)
@@ -335,22 +294,14 @@ class MtpDevice:
         )
         self.set_object_prop_value(file_handle, 0xDC07, payload)
 
-    def get_object_handles(
-        self, storage_id: int, parent_id: int = ROOT_PARENT
-    ) -> list[int]:
+    def get_object_handles(self, storage_id: int, parent_id: int = ROOT_PARENT) -> list[int]:
         """Children of `parent_id` on `storage_id` (ROOT_PARENT lists the top level)."""
-        _, raw = self._tx_data_in(
-            Operations.GetObjectHandles, [storage_id, 0, parent_id]
-        )
+        _, raw = self._tx_data_in(Operations.GetObjectHandles, [storage_id, 0, parent_id])
         n = int.from_bytes(raw[:4], "little")
-        return [
-            int.from_bytes(raw[4 + i * 4 : 4 + (i + 1) * 4], "little") for i in range(n)
-        ]
+        return [int.from_bytes(raw[4 + i * 4 : 4 + (i + 1) * 4], "little") for i in range(n)]
 
     def get_object_filename(self, handle: int) -> str:
-        _, raw = self._tx_data_in(
-            Operations.GetObjectPropValue, [handle, OBJECT_FILENAME_PROP]
-        )
+        _, raw = self._tx_data_in(Operations.GetObjectPropValue, [handle, OBJECT_FILENAME_PROP])
         # MTP string prop: 1-byte char count, then UTF-16LE, incl. null terminator
         n_chars = raw[0]
         return raw[1 : 1 + n_chars * 2].decode("utf-16-le").rstrip("\x00")
@@ -360,9 +311,7 @@ class MtpDevice:
         _, data = self._tx_data_in(Operations.GetObject, [handle])
         return data
 
-    def find_object(
-        self, storage_id: int, path_parts: Iterable[str], parent_id: int = ROOT_PARENT
-    ) -> int | None:
+    def find_object(self, storage_id: int, path_parts: Iterable[str], parent_id: int = ROOT_PARENT) -> int | None:
         """Resolve e.g. ['SW Update', 'version.txt'] to an object handle."""
         parent = parent_id
         for part in path_parts:
@@ -380,9 +329,7 @@ class MtpDevice:
             return None
         return self.get_object(handle)
 
-    def dump_tree(
-        self, storage_id: int, parent_id: int = ROOT_PARENT, prefix: str = ""
-    ) -> None:
+    def dump_tree(self, storage_id: int, parent_id: int = ROOT_PARENT, prefix: str = "") -> None:
         for handle in self.get_object_handles(storage_id, parent_id):
             try:
                 name = self.get_object_filename(handle)

@@ -14,9 +14,7 @@ class ErrorScreen(QWidget):
     def __init__(self, translator: Translator, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self._translator = translator
-        self._message_key: str | None = (
-            None  # set when the message should be re-translated
-        )
+        self._message_key: str | None = None  # set when the message should be re-translated
         self._detailed: bool | str = False  # whether a ".detailed" row is shown
 
         outer = QVBoxLayout(self)
@@ -74,9 +72,7 @@ class ErrorScreen(QWidget):
             self._detailed_label.setText(self._translator.tr(self._detailed))
             self._detailed_label.show()
         elif self._detailed:
-            self._detailed_label.setText(
-                self._translator.tr(f"{self._message_key}.detailed")
-            )
+            self._detailed_label.setText(self._translator.tr(f"{self._message_key}.detailed"))
             self._detailed_label.show()
         else:
             self._detailed_label.clear()

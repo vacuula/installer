@@ -7,12 +7,7 @@ from PySide6.QtCore import QCoreApplication, Qt
 from PySide6.QtGui import QGuiApplication, QIcon, QPainter, QPixmap
 from PySide6.QtSvg import QSvgRenderer
 
-from vacuula_installer.constants import (
-    APP_ID,
-    LOGO_SVG,
-    ORG_NAME,
-    WINDOWS_APP_USER_MODEL_ID,
-)
+from vacuula_installer.constants import APP_ID, LOGO_SVG, ORG_NAME, WINDOWS_APP_USER_MODEL_ID
 
 logger = logging.getLogger(__name__)
 
@@ -62,8 +57,6 @@ def _set_windows_app_user_model_id() -> None:
 
         # ctypes.windll only exists on Windows; the checker targets Linux too.
         # ty: ignore[unresolved-attribute]
-        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
-            WINDOWS_APP_USER_MODEL_ID
-        )
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(WINDOWS_APP_USER_MODEL_ID)
     except (AttributeError, OSError):
         pass

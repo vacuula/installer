@@ -4,13 +4,7 @@ from __future__ import annotations
 
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtSvgWidgets import QSvgWidget
-from PySide6.QtWidgets import (
-    QHBoxLayout,
-    QLabel,
-    QStackedLayout,
-    QVBoxLayout,
-    QWidget,
-)
+from PySide6.QtWidgets import QHBoxLayout, QLabel, QStackedLayout, QVBoxLayout, QWidget
 
 from vacuula_installer.constants import CONNECT_SVG, WIREFRAME_SIZE
 from vacuula_installer.i18n import Translator
@@ -98,9 +92,7 @@ class ConnectRobotScreen(QWidget):
         """Show detected robot model."""
 
         self._model_display_name = display_name
-        self._status_label.setText(
-            self._translator.tr("connect.status.detected", model=display_name)
-        )
+        self._status_label.setText(self._translator.tr("connect.status.detected", model=display_name))
         self._spinner.stop()
 
     def _retranslate(self) -> None:
@@ -109,8 +101,4 @@ class ConnectRobotScreen(QWidget):
         if self._model_id is None:
             self._status_label.setText(self._translator.tr("connect.status.waiting"))
         else:
-            self._status_label.setText(
-                self._translator.tr(
-                    "connect.status.detected", model=self._model_display_name
-                )
-            )
+            self._status_label.setText(self._translator.tr("connect.status.detected", model=self._model_display_name))

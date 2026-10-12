@@ -23,9 +23,7 @@ class RobotSerialMonitor(QObject):
     def start(self, port: str, baudrate: int) -> None:
         self.stop()  # make sure a previous session is really gone first
         self._stop_event.clear()
-        self._thread = threading.Thread(
-            target=self._run, args=(port, baudrate), daemon=True
-        )
+        self._thread = threading.Thread(target=self._run, args=(port, baudrate), daemon=True)
         self._thread.start()
 
     def stop(self) -> None:

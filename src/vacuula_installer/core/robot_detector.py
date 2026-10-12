@@ -36,9 +36,7 @@ SERIAL_TIMEOUT_S = 1.0
 GET_VERSION_CMD = b"GetVersion\n"
 
 if sys.platform == "win32":
-    USB_BACKEND = usb.backend.libusb1.get_backend(
-        find_library=lambda _: str(LIBUSB_DLL)
-    )
+    USB_BACKEND = usb.backend.libusb1.get_backend(find_library=lambda _: str(LIBUSB_DLL))
 
     if USB_BACKEND is None:
         raise RuntimeError(f"Could not load libusb backend from {LIBUSB_DLL}")
@@ -157,19 +155,13 @@ class RobotDetector(QObject):
     """
 
     robotDisconnected = Signal()
-    robotDetected = Signal(
-        str, usb.core.Device
-    )  # display_name, serial_device TODO, usb_device
-    gen23VersionText = Signal(
-        str
-    )  # temp solution, should be looked over how exactly this should be fetched and saved
+    robotDetected = Signal(str, usb.core.Device)  # display_name, serial_device TODO, usb_device
+    gen23VersionText = Signal(str)  # temp solution, should be looked over how exactly this should be fetched and saved
 
     # Probably never happens but needs to be handled:
     multipleRobotsDetected = Signal()
 
-    def __init__(
-        self, parent: QObject | None = None, lastState: State = State.NONE
-    ) -> None:
+    def __init__(self, parent: QObject | None = None, lastState: State = State.NONE) -> None:
         super().__init__(parent)
         self._timer = QTimer(self)
         self._timer.setSingleShot(False)
@@ -201,35 +193,21 @@ class RobotDetector(QObject):
 
         resolved: list[tuple[usb.core.Device, RobotUsbId]] = []
 
-        gen4_devices = usb.core.find(
-            find_all=True,
-            idVendor=GEN4_USB[0],
-            idProduct=GEN4_USB[1],
-            backend=USB_BACKEND,
-        )
+        gen4_devices = usb.core.find(find_all=True, idVendor=GEN4_USB[0], idProduct=GEN4_USB[1], backend=USB_BACKEND)
         for dev in gen4_devices if gen4_devices is not None else []:
             logger.debug("usb.core.find matched GEN4 device")
             if not isinstance(dev, usb.core.Device):
                 logger.debug("usb.core.find returned non-Device for GEN4 device")
                 continue
 
-            descriptor_matches = [
-                c
-                for c in ids_by_usb_id[(0x1D6B, 0x0100)]
-                if self._descriptor_matches(dev, c)
-            ]
+            descriptor_matches = [c for c in ids_by_usb_id[(0x1D6B, 0x0100)] if self._descriptor_matches(dev, c)]
             if not descriptor_matches:
                 continue
             robot_id = self._resolve_robot(dev, descriptor_matches)
             if robot_id is not None:
                 resolved.append((dev, robot_id))
 
-        gen23_devices = usb.core.find(
-            find_all=True,
-            idVendor=GEN23_USB[0],
-            idProduct=GEN23_USB[1],
-            backend=USB_BACKEND,
-        )
+        gen23_devices = usb.core.find(find_all=True, idVendor=GEN23_USB[0], idProduct=GEN23_USB[1], backend=USB_BACKEND)
         for dev in gen23_devices if gen23_devices is not None else []:
             logger.debug("usb.core.find matched GEN2/GEN3 device")
             if not isinstance(dev, usb.core.Device):
@@ -268,22 +246,13 @@ class RobotDetector(QObject):
         if sys.platform == "win32":
             return True  # windows cannot open and read, verify by serial existing. TODO: make sure other mtp devices wont show up as robots
         try:
-            manufacturer = (
-                usb.util.get_string(dev, dev.iManufacturer)
-                if dev.iManufacturer
-                else None
-            )
+            manufacturer = usb.util.get_string(dev, dev.iManufacturer) if dev.iManufacturer else None
             product = usb.util.get_string(dev, dev.iProduct) if dev.iProduct else None
         except (usb.core.USBError, ValueError, NotImplementedError):
             return False
-        return (
-            manufacturer == robot_id.usb_iManufacturer
-            and product == robot_id.usb_iProduct
-        )
+        return manufacturer == robot_id.usb_iManufacturer and product == robot_id.usb_iProduct
 
-    def _resolve_robot(
-        self, dev: usb.core.Device, candidates: list[RobotUsbId]
-    ) -> RobotUsbId | None:
+    def _resolve_robot(self, dev: usb.core.Device, candidates: list[RobotUsbId]) -> RobotUsbId | None:
         """Given a physical device and the RobotUsbId entries whose
         idVendor/idProduct/iManufacturer/iProduct all matched it, work out
         exactly which model it is. Each USB id group has exactly one valid
@@ -300,9 +269,7 @@ class RobotDetector(QObject):
         return None
 
     @staticmethod
-    def _match_by_usb_serial(
-        dev: usb.core.Device, candidates: list[RobotUsbId]
-    ) -> RobotUsbId | None:
+    def _match_by_usb_serial(dev: usb.core.Device, candidates: list[RobotUsbId]) -> RobotUsbId | None:
         serial_number = RobotDetector._get_serial(dev)
 
         for candidate in candidates:
@@ -312,9 +279,7 @@ class RobotDetector(QObject):
                 return candidate
         return None
 
-    def _match_by_get_version(
-        self, dev: usb.core.Device, candidates: list[RobotUsbId]
-    ) -> RobotUsbId | None:
+    def _match_by_get_version(self, dev: usb.core.Device, candidates: list[RobotUsbId]) -> RobotUsbId | None:
         cache_key = (dev.bus, dev.address)
         cached = self._resolved_cache.get(cache_key)
         if cached in candidates:
@@ -364,9 +329,7 @@ class RobotDetector(QObject):
     @staticmethod
     def write_cmd_port(port_name: str, cmd: str) -> str | None:
         try:
-            with serial.Serial(
-                port_name, baudrate=SERIAL_BAUDRATE, timeout=SERIAL_TIMEOUT_S
-            ) as ser:
+            with serial.Serial(port_name, baudrate=SERIAL_BAUDRATE, timeout=SERIAL_TIMEOUT_S) as ser:
                 ser.reset_input_buffer()
                 ser.write(cmd.encode("ascii") + b"\n")
                 ser.flush()
@@ -391,9 +354,7 @@ class RobotDetector(QObject):
                     buf += chunk
                     if terminator in buf:
                         return buf.decode("ascii", errors="ignore")
-            raise TimeoutError(
-                f"timed out waiting for terminator {terminator!r}; got {bytes(buf)!r}"
-            )
+            raise TimeoutError(f"timed out waiting for terminator {terminator!r}; got {bytes(buf)!r}")
 
     @staticmethod
     def _query_get_version(dev: usb.core.Device) -> str | None:
@@ -411,20 +372,14 @@ class RobotDetector(QObject):
                 try:
                     serials = present_robot_serials()
                 except Exception:  # noqa: BLE001
-                    logger.error(
-                        "present_robot_serials could not list present robots to fetch serial"
-                    )
+                    logger.error("present_robot_serials could not list present robots to fetch serial")
                     serials = []
                 if len(serials) == 1:
                     return serials[0]
                 if serials:
                     return ""  # several robots: can't tell which libusb device is which
             # Fallback (and gen2/3): serial number of the robot's COM port.
-            ports = [
-                p
-                for p in serial.tools.list_ports.comports()
-                if p.vid == dev.idVendor and p.pid == dev.idProduct
-            ]
+            ports = [p for p in serial.tools.list_ports.comports() if p.vid == dev.idVendor and p.pid == dev.idProduct]
             return (ports[0].serial_number or "") if len(ports) == 1 else ""
         try:
             serial_number = dev.serial_number

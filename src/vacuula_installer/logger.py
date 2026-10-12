@@ -12,11 +12,7 @@ def is_frozen() -> bool:
 
 
 def get_log_file_path() -> Path:
-    log_dir = Path(
-        QStandardPaths.writableLocation(
-            QStandardPaths.StandardLocation.AppLocalDataLocation
-        )
-    )
+    log_dir = Path(QStandardPaths.writableLocation(QStandardPaths.StandardLocation.AppLocalDataLocation))
     log_dir.mkdir(parents=True, exist_ok=True)
     return log_dir / "VacuulaInstaller.log"
 
@@ -30,8 +26,7 @@ def setup_logging() -> None:
         return
 
     formatter = logging.Formatter(
-        fmt="%(asctime)s | %(levelname)-8s | %(name)s | %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S",
+        fmt="%(asctime)s | %(levelname)-8s | %(name)s | %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
     )
 
     if not is_frozen():
@@ -41,12 +36,7 @@ def setup_logging() -> None:
         root_logger.addHandler(console)
 
     log_file = get_log_file_path()
-    handler = RotatingFileHandler(
-        log_file,
-        maxBytes=2 * 1024 * 1024,
-        backupCount=3,
-        encoding="utf-8",
-    )
+    handler = RotatingFileHandler(log_file, maxBytes=2 * 1024 * 1024, backupCount=3, encoding="utf-8")
 
     handler.setLevel(logging.DEBUG)
     handler.setFormatter(formatter)
@@ -64,18 +54,13 @@ def download_logs() -> None:
         return
 
     save_path, _ = QFileDialog.getSaveFileName(
-        None,
-        "Save Logs",
-        str(Path.home() / "VacuulaInstaller.log"),
-        "Log Files (*.log);;All Files (*)",
+        None, "Save Logs", str(Path.home() / "VacuulaInstaller.log"), "Log Files (*.log);;All Files (*)"
     )
 
     if save_path:
         try:
             with open(log_file, "rb") as src, open(save_path, "wb") as dst:
                 dst.write(src.read())
-            QMessageBox.information(
-                None, "Download Logs", f"Logs saved to {save_path}."
-            )
+            QMessageBox.information(None, "Download Logs", f"Logs saved to {save_path}.")
         except Exception as e:  # noqa: BLE001
             QMessageBox.critical(None, "Download Logs", f"Failed to save logs: {e}")

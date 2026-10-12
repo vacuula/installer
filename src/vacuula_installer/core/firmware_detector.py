@@ -9,14 +9,9 @@ from PySide6.QtCore import QObject, Signal
 from vacuula_installer.core.mtp import MtpDevice
 from vacuula_installer.core.robot_detector import RobotDetector
 
-VALID_GEN3_VERSIONS = [
-    ("4.5.3", "Software,4,5,3,189,0"),
-    ("4.6.0", "Software,4,6,0,72,0"),
-]
+VALID_GEN3_VERSIONS = [("4.5.3", "Software,4,5,3,189,0"), ("4.6.0", "Software,4,6,0,72,0")]
 
-VALID_GEN4_VERSIONS = [
-    ("1.7.0", "Firmware version: 1.7.0-2933"),
-]
+VALID_GEN4_VERSIONS = [("1.7.0", "Firmware version: 1.7.0-2933")]
 
 # TODO Nonblocking thread, see server detector
 
@@ -42,10 +37,7 @@ class FirmwareDetector(QObject):
             return
 
         # gen4:
-        threading.Thread(
-            target=lambda: self._done.emit(*self._detect_gen4(device)),
-            daemon=True,
-        ).start()
+        threading.Thread(target=lambda: self._done.emit(*self._detect_gen4(device)), daemon=True).start()
 
     def stop(self) -> None:
         self._active = False

@@ -99,10 +99,7 @@ class Gen4ProvisionScreen(QWidget):
         it gets the spinner, everything after it is an empty circle."""
         self._step = step
         current = step - 1
-        self._render(
-            done_up_to=current,
-            spinning=current if current < len(STEP_KEYS) else None,
-        )
+        self._render(done_up_to=current, spinning=current if current < len(STEP_KEYS) else None)
 
     def set_finished(self) -> None:
         self._done = True

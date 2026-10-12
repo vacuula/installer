@@ -34,3 +34,11 @@ dev = [
     "ruff>=0.16.8",
     "ty>=0.0.81",
 ]
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.format]
+skip-magic-trailing-comma = true
+
+[tool.ruff.lint.isort]
+split-on-trailing-comma = false

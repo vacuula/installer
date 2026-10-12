@@ -44,10 +44,7 @@ class Handler(BaseHTTPRequestHandler):
         data = b"FAKE-BEGIN CERTIFICATE-FAKE\n"
         self.send_response(200)
         self.send_header("Content-Type", "text/plain; charset=utf-8")
-        self.send_header(
-            "Content-Disposition",
-            'attachment; filename="cert.txt"',
-        )
+        self.send_header("Content-Disposition", 'attachment; filename="cert.txt"')
         self.send_header("Content-Length", str(len(data)))
         self.end_headers()
         self.wfile.write(data)
@@ -68,12 +65,7 @@ info = ServiceInfo(
     addresses=[socket.inet_aton(ip)],
     server=MDNS_HOSTNAME,
     port=PORT,
-    properties={
-        "version": "1",
-        "cert-path": "/api/cert",
-        "protocol": "http",
-        "url": "http://vacuula.local",
-    },
+    properties={"version": "1", "cert-path": "/api/cert", "protocol": "http", "url": "http://vacuula.local"},
 )
 zc.register_service(info)
 print(f"Advertising {HOSTNAME} -> {ip}")
