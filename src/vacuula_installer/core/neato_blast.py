@@ -202,7 +202,7 @@ class NeatoRobot:
 
     # -- the whole transaction --------------------------------------------
 
-    def upload(
+    def upload(  # ruff: ignore[C901]
         self,
         path: str,
         kind: str = "code",
