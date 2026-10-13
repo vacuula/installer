@@ -1,4 +1,5 @@
 """2-step checklist shown while files are pushed to a Gen4 robot over MTP."""
+
 from __future__ import annotations
 
 from PySide6.QtCore import Qt

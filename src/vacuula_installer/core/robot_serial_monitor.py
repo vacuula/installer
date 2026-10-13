@@ -1,5 +1,6 @@
 """Continuously reads lines from the robot's serial port in the background
 and emits them, e.g. for watching install-script output."""
+
 from __future__ import annotations
 
 import threading
@@ -11,7 +12,7 @@ READ_TIMEOUT_S = 0.5  # how often the read loop checks for a stop request
 
 
 class RobotSerialMonitor(QObject):
-    lineReceived = Signal(str)   # every non-empty line, as it arrives
+    lineReceived = Signal(str)  # every non-empty line, as it arrives
     monitorFailed = Signal(str)  # the port could not be opened/read
 
     def __init__(self, parent: QObject | None = None) -> None:
@@ -22,9 +23,7 @@ class RobotSerialMonitor(QObject):
     def start(self, port: str, baudrate: int) -> None:
         self.stop()  # make sure a previous session is really gone first
         self._stop_event.clear()
-        self._thread = threading.Thread(
-            target=self._run, args=(port, baudrate), daemon=True
-        )
+        self._thread = threading.Thread(target=self._run, args=(port, baudrate), daemon=True)
         self._thread.start()
 
     def stop(self) -> None:

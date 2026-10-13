@@ -32,9 +32,7 @@ class FlagButton(QToolButton):
         self._menu.setObjectName("languageMenu")
         self._menu.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self._menu.setWindowFlags(
-            self._menu.windowFlags()
-            | Qt.WindowType.FramelessWindowHint
-            | Qt.WindowType.NoDropShadowWindowHint
+            self._menu.windowFlags() | Qt.WindowType.FramelessWindowHint | Qt.WindowType.NoDropShadowWindowHint
         )
         self._build_menu()
 
@@ -46,9 +44,7 @@ class FlagButton(QToolButton):
         anchor = self.parentWidget() or self
         anchor_center = anchor.mapToGlobal(anchor.rect().center())
         menu_size = self._menu.sizeHint()
-        top_left = anchor_center - QPoint(
-            menu_size.width() // 2, menu_size.height() // 2
-        )
+        top_left = anchor_center - QPoint(menu_size.width() // 2, menu_size.height() // 2)
         self._menu.popup(top_left)
 
     def _build_menu(self) -> None:

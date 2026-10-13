@@ -7,6 +7,7 @@ constants.py -- no other code changes required.
 NOTE: If strings are added, increment strings version!
 Higest strings version language file is the one to translate from, keep it english ja?
 """
+
 from __future__ import annotations
 
 import json
@@ -36,10 +37,7 @@ class Translator(QObject):
 
         if default_language not in self._catalogs:
             available = ", ".join(sorted(self._catalogs)) or "<none>"
-            raise ValueError(
-                f"Default language {default_language!r} has no catalog "
-                f"in {locales_dir} (found: {available})"
-            )
+            raise ValueError(f"Default language {default_language!r} has no catalog in {locales_dir} (found: {available})")
         self._language = default_language
 
     def _load_catalogs(self) -> None:
