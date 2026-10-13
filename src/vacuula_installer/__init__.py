@@ -11,7 +11,7 @@ from vacuula_installer.app_identity import apply_app_icon, prepare_app_identity
 from vacuula_installer.constants import DEFAULT_LANGUAGE, LOCALES_DIR
 from vacuula_installer.i18n import Translator
 from vacuula_installer.library_path import restore_library_path
-from vacuula_installer.logger import setup_logging
+from vacuula_installer.logger_setup import setup_logging
 from vacuula_installer.main_window import MainWindow
 from vacuula_installer.theme import apply_app_palette
 

@@ -55,7 +55,7 @@ from vacuula_installer.core.robot_detector import RobotDetector
 from vacuula_installer.core.server_detector import ServerDetector
 from vacuula_installer.core.session import SessionData
 from vacuula_installer.i18n import Translator
-from vacuula_installer.logger import download_logs
+from vacuula_installer.logger_setup import download_logs
 from vacuula_installer.screens.connect_robot import ConnectRobotScreen
 from vacuula_installer.screens.disclaimer import DisclaimerScreen
 from vacuula_installer.screens.error import ErrorScreen
@@ -347,6 +347,7 @@ class MainWindow(QMainWindow):
 
     def _on_firmware_install_requested(self, key: str) -> None:
         gen = key.split("-", 1)[0]
+        assert self._session.robot_usb_device, "Robot USB device should be set"
         if gen == "gen3":
             mac = self._gen23_wifi_fixer.gen23_get_mac_from_version(self._session.firmware_version)
             if mac is None:
@@ -462,7 +463,9 @@ class MainWindow(QMainWindow):
             self._goto_wifi_screen()
         elif msg == "error.firmware.invalid":
             self._crossfade_to(self._firmware_update_screen)
-            self._firmware_update_screen.set_generation(self.get_gen())
+            generation = self.get_gen()
+            assert generation, "Generation should not be None"
+            self._firmware_update_screen.set_generation(generation)
         else:
             # TODO: check if link is clickable here (error.firmware.help)
             self._show_error(msg, detailed="error.firmware.help" if msg == "error.firmware.invalid" else "error.generic.help")
@@ -569,6 +572,7 @@ class MainWindow(QMainWindow):
             case "Neato Botvac Connected":
                 return "gen2"
             case _:
+                logger.error("Generation of robot not detected")
                 return None
 
     def _goto_install_screen(self, ssid: str, password: str) -> None:

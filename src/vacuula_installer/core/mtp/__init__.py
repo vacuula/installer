@@ -133,7 +133,7 @@ class MtpDevice:
         return MTP_PACKET.parse(bytes(self.ep_in.read(self.MAX_BUF, timeout)))
 
     def _send_data_stream(self, tx_id: int, code: int, src: _Source, progress: ProgressFn | None = None) -> None:
-        packet = self.ep_out.wMaxPacketSize
+        packet = self.ep_out.wMaxPacketSize  # ty: ignore[unresolved-attribute]
         chunk = max(packet, self.WRITE_CHUNK // packet * packet)
         total = 12 + src.size
         length = total if total <= 0xFFFFFFFF else 0xFFFFFFFF  # MTP >4 GB marker
@@ -173,7 +173,7 @@ class MtpDevice:
             raise MtpError(f"Expected Data, got {data.container_type}")
         return data.payload
 
-    def _read_response(self, timeout: int | None = None) -> tuple[int]:
+    def _read_response(self, timeout: int | None = None) -> tuple[int, ...]:
         resp = self._read_pkt(timeout)
         if resp.container_type != ContainerType.Response:
             raise MtpError(f"Expected Response, got {resp.container_type}")
