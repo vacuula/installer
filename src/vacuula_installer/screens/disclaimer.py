@@ -62,9 +62,7 @@ class DisclaimerScreen(QWidget):
         # Bullet block: bullet rows plus the acknowledgement checkbox.
         self._bullet_block = QWidget(self)
         self._bullet_block.setObjectName("bulletBlock")
-        self._bullet_block.setSizePolicy(
-            QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Minimum
-        )
+        self._bullet_block.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Minimum)
 
         self._bullets: list[tuple[str, QLabel]] = []  # (translation key, text label)
         block_layout = QVBoxLayout(self._bullet_block)
@@ -72,12 +70,8 @@ class DisclaimerScreen(QWidget):
         block_layout.setSpacing(8)
         for key in self._BULLET_KEYS:
             self._add_bullet_row(block_layout, key)
-        self._acknowledge_checkbox, self._acknowledge_caption = (
-            self._add_acknowledge_row(block_layout,4 )
-        )
-        self._warning_checkbox, self._warning_caption = (
-                    self._add_acknowledge_row(block_layout, 6)
-                )
+        self._acknowledge_checkbox, self._acknowledge_caption = self._add_acknowledge_row(block_layout, 4)
+        self._warning_checkbox, self._warning_caption = self._add_acknowledge_row(block_layout, 6)
 
         self._understand_button = QPushButton(self)
         self._understand_button.setObjectName("understandButton")
@@ -108,13 +102,9 @@ class DisclaimerScreen(QWidget):
         self._translator.languageChanged.connect(self._retranslate)
         self._retranslate()
 
-
     def _update_understand_button(self) -> None:
         """Enable the button only while every acknowledgement is ticked."""
-        self._understand_button.setEnabled(
-            self._acknowledge_checkbox.isChecked()
-            and self._warning_checkbox.isChecked()
-        )
+        self._understand_button.setEnabled(self._acknowledge_checkbox.isChecked() and self._warning_checkbox.isChecked())
 
     def _new_row(self) -> QHBoxLayout:
         row = QHBoxLayout()
@@ -197,9 +187,7 @@ class DisclaimerScreen(QWidget):
         width = 0
         for label, lead in rows:  # lead = marker / checkbox column in front of the text
             lead += self._ROW_SPACING
-            width = max(
-                width, lead + self._wrapped_width(label, self._MAX_BLOCK_WIDTH - lead)
-            )
+            width = max(width, lead + self._wrapped_width(label, self._MAX_BLOCK_WIDTH - lead))
         # +2 px of slack so rounding can never re-wrap the widest line.
         self._bullet_block.setFixedWidth(min(width + 2, self._MAX_BLOCK_WIDTH))
 

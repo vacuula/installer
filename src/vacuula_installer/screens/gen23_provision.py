@@ -1,4 +1,5 @@
 """4-step checklist shown while the robot joins wifi and the cloud."""
+
 from __future__ import annotations
 
 from PySide6.QtCore import QMargins, Qt

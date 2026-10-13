@@ -44,11 +44,11 @@ LIBUSB_DLL: Path = DLL_DIR / "libusb-1.0.dll"
 # --------------------------------------------------------------------------
 # Window & layout geometry
 # --------------------------------------------------------------------------
-WINDOW_SIZE: tuple[int, int] = (1040, 640) #I think os will scale this and not take it litteraly
+WINDOW_SIZE: tuple[int, int] = (1040, 640)  # I think os will scale this and not take it litteraly
 LEFT_PANEL_RATIO: float = 0.38  # fraction of the window width
 
-LOGO_SIZE_CENTERED: int = 654   # logo size during the intro splash
-LOGO_SIZE_DOCKED: int = 300     # logo size once settled in the left panel
+LOGO_SIZE_CENTERED: int = 654  # logo size during the intro splash
+LOGO_SIZE_DOCKED: int = 300  # logo size once settled in the left panel
 
 BACK_BUTTON_SIZE: int = 36
 BACK_BUTTON_MARGIN: int = 16
@@ -77,17 +77,25 @@ class LanguageMeta(NamedTuple):
 
 
 # Every UI language MUST have both an entry here *and* a matching
-# ``locales/<code>.json`` catalog. 
+# ``locales/<code>.json`` catalog.
 # Sorted by language code by program
 LANGUAGES: dict[str, LanguageMeta] = {
     "sv": LanguageMeta(flag_svg=FLAGS_DIR / "se.svg", native_name="Svenska"),
     "en": LanguageMeta(flag_svg=FLAGS_DIR / "gb.svg", native_name="English"),
     "nl": LanguageMeta(flag_svg=FLAGS_DIR / "nl.svg", native_name="Nederlands"),
 }
-DEFAULT_LANGUAGE = "en" #might be replaced with system locale? I dunno how to fetch safely crossplatform
+DEFAULT_LANGUAGE = "en"  # might be replaced with system locale? I dunno how to fetch safely crossplatform
 
 # Backgroundflair, maybe do languages actually translated to?
 FLAIR_WELCOME_WORDS: list[str] = [
-    "Welcome", "Willkommen", "Bienvenue", "Bienvenida", "Benvenuto",
-    "Bem-vindo", "いらっしゃいませ", "Välkommen", "Velkommen", "Tervetuloa",
+    "Welcome",
+    "Willkommen",
+    "Bienvenue",
+    "Bienvenida",
+    "Benvenuto",
+    "Bem-vindo",
+    "いらっしゃいませ",
+    "Välkommen",
+    "Velkommen",
+    "Tervetuloa",
 ]
