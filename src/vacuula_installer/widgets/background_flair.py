@@ -86,34 +86,23 @@ class BackgroundFlairWidget(QWidget):
                 y = y_ratio * ref_height
 
                 # Check window-edge clipping.
-                if (
-                    x - w / 2 < 0
-                    or x + w / 2 > ref_width
-                    or y - h / 2 < 0
-                    or y + h / 2 > ref_height
-                ):
+                if x - w / 2 < 0 or x + w / 2 > ref_width or y - h / 2 < 0 or y + h / 2 > ref_height:
                     continue
 
                 # Avoid the center where buttons sit.
-                if (
-                    abs(x_ratio - 0.5) < _CENTER_EXCLUDE_X_RATIO
-                    and abs(y_ratio - 0.5) < _CENTER_EXCLUDE_Y_RATIO
-                ):
+                if abs(x_ratio - 0.5) < _CENTER_EXCLUDE_X_RATIO and abs(y_ratio - 0.5) < _CENTER_EXCLUDE_Y_RATIO:
                     continue
 
                 # Check overlap with already placed words.
                 overlaps = any(
-                    abs(x - px) < (w + pw) / 2 + _MIN_GAP_PX
-                    and abs(y - py) < (h + ph) / 2 + _MIN_GAP_PX
+                    abs(x - px) < (w + pw) / 2 + _MIN_GAP_PX and abs(y - py) < (h + ph) / 2 + _MIN_GAP_PX
                     for px, py, pw, ph in placed_rects
                 )
                 if overlaps:
                     continue
 
                 placed_rects.append((x, y, w, h))
-                items.append(
-                    _FlairItem(word, x_ratio, y_ratio, angle, point_size, opacity)
-                )
+                items.append(_FlairItem(word, x_ratio, y_ratio, angle, point_size, opacity))
                 break
 
         return items

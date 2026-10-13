@@ -36,9 +36,6 @@ INSTALL_STEP_KEYS = {
 }
 
 
-
-
-
 class _FirmwareOption(QWidget):
     """One selectable row: a radio button, version title, and description."""
 
@@ -67,7 +64,8 @@ class _FirmwareOption(QWidget):
         self._retranslate()
 
     def mouseReleaseEvent(self, event: QMouseEvent) -> None:
-        if event.button() == Qt.MouseButton.LeftButton and self.rect().contains(event.position().toPoint()): self.radio.setChecked(True)
+        if event.button() == Qt.MouseButton.LeftButton and self.rect().contains(event.position().toPoint()):
+            self.radio.setChecked(True)
         super().mouseReleaseEvent(event)
 
     def _retranslate(self) -> None:
@@ -85,8 +83,8 @@ class FirmwareUpdateScreen(QWidget):
     when they ask for the (not yet implemented) automated factory reset.
     """
 
-    downloadRequested = Signal(str)       # firmware key
-    installRequested = Signal(str)        # firmware key
+    downloadRequested = Signal(str)  # firmware key
+    installRequested = Signal(str)  # firmware key
 
     def __init__(self, translator: Translator, parent: QWidget | None = None) -> None:
         super().__init__(parent)
@@ -95,8 +93,8 @@ class FirmwareUpdateScreen(QWidget):
         self._options: list[_FirmwareOption] = []
         self._selected_key: str | None = None
         self._downloaded_key: str | None = None
-        self._progress_kind: str | None = None   # "download" | "install", while on the progress page
-        self._retry_kind: str | None = None       # which phase a retry should re-attempt
+        self._progress_kind: str | None = None  # "download" | "install", while on the progress page
+        self._retry_kind: str | None = None  # which phase a retry should re-attempt
 
         outer = QVBoxLayout(self)
         outer.setContentsMargins(20, 40, 20, 26)
@@ -145,9 +143,7 @@ class FirmwareUpdateScreen(QWidget):
         self._factory_reset_ack_caption.setObjectName("serversearchDetailLabel")
         self._factory_reset_ack_caption.setWordWrap(True)
         self._factory_reset_ack_caption.setCursor(Qt.CursorShape.PointingHandCursor)
-        self._factory_reset_ack_caption.setSizePolicy(
-            QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Minimum
-        )
+        self._factory_reset_ack_caption.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Minimum)
         self._factory_reset_ack_caption.clicked.connect(self._factory_reset_ack_checkbox.toggle)
 
         ack_row_layout.addWidget(self._factory_reset_ack_checkbox, alignment=Qt.AlignmentFlag.AlignTop)
@@ -215,7 +211,7 @@ class FirmwareUpdateScreen(QWidget):
         progress_layout.addWidget(self._progress_bar, alignment=Qt.AlignmentFlag.AlignHCenter)
         outer.addWidget(self._progress_row)
 
-        # -- error row 
+        # -- error row
         self._error_label = QLabel(self)
         self._error_label.setObjectName("serversearchDetailLabel")
         self._error_label.setAlignment(Qt.AlignmentFlag.AlignHCenter)
@@ -228,7 +224,7 @@ class FirmwareUpdateScreen(QWidget):
         self._retry_button.clicked.connect(self._on_retry_clicked)
         outer.addWidget(self._retry_button, alignment=Qt.AlignmentFlag.AlignHCenter)
 
-        # -- install prompt page (shown once the download is done) 
+        # -- install prompt page (shown once the download is done)
         self._install_button = QPushButton(self)
         self._install_button.setObjectName("continueButton")
         self._install_button.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -272,9 +268,7 @@ class FirmwareUpdateScreen(QWidget):
             return
         for key, asset in assets_for_gen(self._gen):
             option = _FirmwareOption(key, asset, self._translator, self._options_box)
-            option.radio.toggled.connect(
-                lambda checked, k=key: self._on_option_toggled(k, checked)
-            )
+            option.radio.toggled.connect(lambda checked, k=key: self._on_option_toggled(k, checked))
             self._button_group.addButton(option.radio)
             self._options_layout.addWidget(option)
             self._options.append(option)
@@ -335,7 +329,7 @@ class FirmwareUpdateScreen(QWidget):
             return
         self._progress_status.setText(self._translator.tr(f"firmware.install.step.done.{self._gen}"))
         self._progress_status.setFixedHeight(self._progress_status.heightForWidth(350))
-        self.page = "done" # temp hack thing to detect disconnectes
+        self.page = "done"  # temp hack thing to detect disconnectes
         self._progress_bar.hide()
 
     def _set_bar_percent(self, percent: int) -> None:

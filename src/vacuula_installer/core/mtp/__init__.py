@@ -16,6 +16,8 @@ logger = logging.getLogger(__name__)
 # Something to upload: raw bytes, a path, or an open binary file.
 DataSource = Union[bytes, bytearray, memoryview, str, os.PathLike, BinaryIO]
 ProgressFn = Callable[[int, int], None]  # (bytes_sent, total_bytes)
+
+
 class _Source:
     """Uniform (stream, size) view of a DataSource; closes files it opened."""
 
@@ -49,7 +51,7 @@ class _Source:
 
 
 class MTP_PACKET:
-    def __init__(self, container_type=0, code=0, tx_id=0, payload=b''):
+    def __init__(self, container_type=0, code=0, tx_id=0, payload=b""):
         self.container_type = container_type  # 2-byte
         self.code = code  # 2-bytes
         self.tx_id = tx_id  # 4-bytes
@@ -57,10 +59,10 @@ class MTP_PACKET:
 
     @classmethod
     def parse(cls, raw_bytes):
-        l = int.from_bytes(raw_bytes[0:4], 'little')
-        container_type = int.from_bytes(raw_bytes[4:6], 'little')
-        code = int.from_bytes(raw_bytes[6:8], 'little')
-        tx_id = int.from_bytes(raw_bytes[8:12], 'little')
+        l = int.from_bytes(raw_bytes[0:4], "little")
+        container_type = int.from_bytes(raw_bytes[4:6], "little")
+        code = int.from_bytes(raw_bytes[6:8], "little")
+        tx_id = int.from_bytes(raw_bytes[8:12], "little")
         payload = raw_bytes[12:]
         return cls(container_type, code, tx_id, payload)
 
@@ -70,11 +72,11 @@ class MTP_PACKET:
 
     def __bytes__(self):
         return (
-                self.length.to_bytes(4, 'little')
-                + self.container_type.to_bytes(2, 'little')
-                + self.code.to_bytes(2, 'little')
-                + self.tx_id.to_bytes(4, 'little')
-                + self.payload
+            self.length.to_bytes(4, "little")
+            + self.container_type.to_bytes(2, "little")
+            + self.code.to_bytes(2, "little")
+            + self.tx_id.to_bytes(4, "little")
+            + self.payload
         )
 
     def __iter__(self):
@@ -104,8 +106,10 @@ def find_mtp_bulk_endpoints(dev: usb.core.Device) -> tuple[usb.core.Endpoint, us
             return ep_in, ep_out
     raise MtpError("Could not find MTP endpoints")
 
+
 OBJECT_FILENAME_PROP = 0xDC07
 ROOT_PARENT = 0xFFFFFFFF
+
 
 class MtpDevice:
     MAX_BUF = 4096
@@ -128,8 +132,7 @@ class MtpDevice:
     def _read_pkt(self, timeout: int | None = None):
         return MTP_PACKET.parse(bytes(self.ep_in.read(self.MAX_BUF, timeout)))
 
-    def _send_data_stream(self, tx_id: int, code: int, src: _Source,
-                          progress: ProgressFn | None = None) -> None:
+    def _send_data_stream(self, tx_id: int, code: int, src: _Source, progress: ProgressFn | None = None) -> None:
         packet = self.ep_out.wMaxPacketSize
         chunk = max(packet, self.WRITE_CHUNK // packet * packet)
         total = 12 + src.size
@@ -158,7 +161,7 @@ class MtpDevice:
             self.ep_out.write(b"", self.WRITE_TIMEOUT_MS)
 
     def _send_command(self, tx_id: int, code: int, args: Iterable[int]):
-        pld = b''.join(arg.to_bytes(4, 'little', signed=arg < 0) for arg in args)
+        pld = b"".join(arg.to_bytes(4, "little", signed=arg < 0) for arg in args)
         self._write_pkt(MTP_PACKET(container_type=ContainerType.Command, code=code, tx_id=tx_id, payload=pld))
 
     def _send_data(self, tx_id: int, code: int, data: bytes):
@@ -177,7 +180,7 @@ class MtpDevice:
         if resp.code != Response.OK:
             raise MtpError(f"Expected OK, got {resp.code}")
         n_params = len(resp.payload) // 4
-        return tuple(int.from_bytes(resp.payload[i * 4:(i + 1) * 4], 'little') for i in range(n_params))
+        return tuple(int.from_bytes(resp.payload[i * 4 : (i + 1) * 4], "little") for i in range(n_params))
 
     def _tx_no_data(self, code: int, args: Iterable[int]) -> tuple:
         tx_id = self._new_tx_id()
@@ -190,7 +193,9 @@ class MtpDevice:
         self._send_data(tx_id, code, data)
         return self._read_response()
 
-    def _tx_data_out_stream(self, code: int, args: Iterable[int], data: DataSource,progress: ProgressFn | None = None) -> tuple:
+    def _tx_data_out_stream(
+        self, code: int, args: Iterable[int], data: DataSource, progress: ProgressFn | None = None
+    ) -> tuple:
         tx_id = self._new_tx_id()
         self._send_command(tx_id, code, args)
         with _Source(data) as src:
@@ -212,31 +217,38 @@ class MtpDevice:
 
     def get_storage_ids(self):
         _, ids_raw = self._tx_data_in(Operations.GetStorageIDs, [])
-        n_ids = int.from_bytes(ids_raw[:4], 'little')
-        return [int.from_bytes(ids_raw[4 + i * 4:4 + (i + 1) * 4], 'little') for i in range(n_ids)]
+        n_ids = int.from_bytes(ids_raw[:4], "little")
+        return [int.from_bytes(ids_raw[4 + i * 4 : 4 + (i + 1) * 4], "little") for i in range(n_ids)]
 
     def send_object_info(self, target_path: str, storage_id: int, parent_id: int = -1, size: int = 0) -> int:
-        object_info = bytes.fromhex(
-            "01 00 ff ff"  # StorageID
-            "00 00"  # Object Format
-            "00 00      "  # Protection Status
-        ) + min(size, 0xFFFFFFFF).to_bytes(4, 'little') + bytes.fromhex(  # Object Compressed Size (0 = unknown)
-            "00 00      "  # Thumb Format
-            "00 00 00 00"  # Thumb Compressed Size
-            "00 00 00 00"  # Thumb Pix Width
-            "00 00 00 00"  # Thumb Pix Height
-            "00 00 00 00"  # Image Pix Width
-            "00 00 00 00"  # Image Pix Height
-            "00 00 00 00"  # Image Bit Depth
-            "ff ff ff ff"  # Parent Object, 0xffffffff = root object
-            "00 00      "  # Association Type
-            "00 00 00 00"  # Association Description
-            "00 00 00 00"  # Sequence Number
-        ) + (len(target_path) + 1).to_bytes(1, 'little') + target_path.encode('utf-16-le') + bytes.fromhex(
-            "00 00"  # null-terminator of actual filename
-            "00"  # Date Created
-            "00"  # Date Modified
-            "00"  # Keywords
+        object_info = (
+            bytes.fromhex(
+                "01 00 ff ff"  # StorageID
+                "00 00"  # Object Format
+                "00 00      "  # Protection Status
+            )
+            + min(size, 0xFFFFFFFF).to_bytes(4, "little")
+            + bytes.fromhex(  # Object Compressed Size (0 = unknown)
+                "00 00      "  # Thumb Format
+                "00 00 00 00"  # Thumb Compressed Size
+                "00 00 00 00"  # Thumb Pix Width
+                "00 00 00 00"  # Thumb Pix Height
+                "00 00 00 00"  # Image Pix Width
+                "00 00 00 00"  # Image Pix Height
+                "00 00 00 00"  # Image Bit Depth
+                "ff ff ff ff"  # Parent Object, 0xffffffff = root object
+                "00 00      "  # Association Type
+                "00 00 00 00"  # Association Description
+                "00 00 00 00"  # Sequence Number
+            )
+            + (len(target_path) + 1).to_bytes(1, "little")
+            + target_path.encode("utf-16-le")
+            + bytes.fromhex(
+                "00 00"  # null-terminator of actual filename
+                "00"  # Date Created
+                "00"  # Date Modified
+                "00"  # Keywords
+            )
         )
         ids = self._tx_data_out(Operations.SendObjectInfo, [storage_id, parent_id], object_info)
         storage_id, parent_handle, newfile_handle = ids
@@ -244,7 +256,7 @@ class MtpDevice:
 
     def send_object(self, file_data: bytes):
         self._tx_data_out(Operations.SendObject, [], file_data)
-    
+
     def send_object_stream(self, data: DataSource, progress: ProgressFn | None = None):
         self._tx_data_out_stream(Operations.SendObject, [], data, progress)
 
@@ -257,8 +269,12 @@ class MtpDevice:
             file_handle = self.send_object_info(staging_path, storage_id, size=src.size)
             self.send_object_stream(src.stream, progress)
         final_path = f"{target_path}"
-        payload = (len(final_path) + 1).to_bytes(1, 'little') + final_path.encode('utf-16-le') + bytes.fromhex(
-            "00 00"  # null-terminator of actual filename
+        payload = (
+            (len(final_path) + 1).to_bytes(1, "little")
+            + final_path.encode("utf-16-le")
+            + bytes.fromhex(
+                "00 00"  # null-terminator of actual filename
+            )
         )
         self.set_object_prop_value(file_handle, 0xDC07, payload)
 
@@ -267,24 +283,26 @@ class MtpDevice:
         file_handle = self.send_object_info(staging_path, storage_id)
         self.send_object(file_data)
         final_path = f"./../../{target_path}"
-        payload = (len(final_path) + 1).to_bytes(1, 'little') + final_path.encode('utf-16-le') + bytes.fromhex(
-            "00 00"  # null-terminator of actual filename
+        payload = (
+            (len(final_path) + 1).to_bytes(1, "little")
+            + final_path.encode("utf-16-le")
+            + bytes.fromhex(
+                "00 00"  # null-terminator of actual filename
+            )
         )
         self.set_object_prop_value(file_handle, 0xDC07, payload)
 
     def get_object_handles(self, storage_id: int, parent_id: int = ROOT_PARENT) -> list[int]:
-            """Children of `parent_id` on `storage_id` (ROOT_PARENT lists the top level)."""
-            _, raw = self._tx_data_in(Operations.GetObjectHandles, [storage_id, 0, parent_id])
-            n = int.from_bytes(raw[:4], 'little')
-            return [int.from_bytes(raw[4 + i * 4:4 + (i + 1) * 4], 'little') for i in range(n)]
+        """Children of `parent_id` on `storage_id` (ROOT_PARENT lists the top level)."""
+        _, raw = self._tx_data_in(Operations.GetObjectHandles, [storage_id, 0, parent_id])
+        n = int.from_bytes(raw[:4], "little")
+        return [int.from_bytes(raw[4 + i * 4 : 4 + (i + 1) * 4], "little") for i in range(n)]
 
     def get_object_filename(self, handle: int) -> str:
-        _, raw = self._tx_data_in(
-            Operations.GetObjectPropValue, [handle, OBJECT_FILENAME_PROP]
-        )
+        _, raw = self._tx_data_in(Operations.GetObjectPropValue, [handle, OBJECT_FILENAME_PROP])
         # MTP string prop: 1-byte char count, then UTF-16LE, incl. null terminator
         n_chars = raw[0]
-        return raw[1:1 + n_chars * 2].decode('utf-16-le').rstrip('\x00')
+        return raw[1 : 1 + n_chars * 2].decode("utf-16-le").rstrip("\x00")
 
     def get_object(self, handle: int) -> bytes:
         """Read a file's full contents by object handle."""
@@ -308,7 +326,7 @@ class MtpDevice:
         if handle is None:
             return None
         return self.get_object(handle)
-    
+
     def dump_tree(self, storage_id: int, parent_id: int = ROOT_PARENT, prefix: str = "") -> None:
         for handle in self.get_object_handles(storage_id, parent_id):
             try:

@@ -43,7 +43,7 @@ def string_to_bytes(s):
 
 
 def byte_to_hex(b):
-    return format(b, '02x')
+    return format(b, "02x")
 
 
 def mac_to_skey(mac, key="h6CX\t\t:<*{Y"):
@@ -72,21 +72,23 @@ def reset_network_cmd(mac: str):
 def getversion_cmd():
     return "GetVerion"
 
+
 @dataclass(frozen=True)
 class File:
     filename: str
     sha256: str
+
 
 class Gen23WiFiFixer(QObject):
     """Uploads the install scripts over serial, then tells the robot to
     reset its network. Runs on a worker thread so the GUI doesn't freeze
     during the (potentially slow) serial upload."""
 
-    gen23_wifiReset = Signal(str)        # serial(mac), [available wifi network ssid:s]
-    gen23_fwResetRequired = Signal()     # triggers page showing fw reset progress
+    gen23_wifiReset = Signal(str)  # serial(mac), [available wifi network ssid:s]
+    gen23_fwResetRequired = Signal()  # triggers page showing fw reset progress
     gen23_fwResetFinished = Signal(bool)  # successful or not TODO
 
-    fixFailed = Signal(str)              # "upload" | "reset"
+    fixFailed = Signal(str)  # "upload" | "reset"
 
     _uploadDone = Signal(bool, object, object)  # ok, device, mac -- worker thread -> GUI thread
     _resetDone = Signal(bool)
@@ -110,9 +112,7 @@ class Gen23WiFiFixer(QObject):
     def fix_robot(self, device: usb.core.Device, mac: str, session: SessionData) -> None:
         self._active = True
         threading.Thread(
-            target=lambda: self._uploadDone.emit(
-                self._upload_scripts(device, session), device, mac
-            ),
+            target=lambda: self._uploadDone.emit(self._upload_scripts(device, session), device, mac),
             daemon=True,
         ).start()
 

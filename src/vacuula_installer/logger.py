@@ -10,14 +10,12 @@ from PySide6.QtWidgets import QFileDialog, QMessageBox
 def is_frozen() -> bool:
     return getattr(sys, "frozen", False)
 
+
 def get_log_file_path() -> Path:
-    log_dir = Path(
-        QStandardPaths.writableLocation(
-            QStandardPaths.StandardLocation.AppLocalDataLocation
-        )
-    )
+    log_dir = Path(QStandardPaths.writableLocation(QStandardPaths.StandardLocation.AppLocalDataLocation))
     log_dir.mkdir(parents=True, exist_ok=True)
     return log_dir / "VacuulaInstaller.log"
+
 
 def setup_logging() -> None:
     root_logger = logging.getLogger()
@@ -38,7 +36,6 @@ def setup_logging() -> None:
         console.setFormatter(formatter)
         root_logger.addHandler(console)
 
-
     log_file = get_log_file_path()
     handler = RotatingFileHandler(
         log_file,
@@ -50,6 +47,7 @@ def setup_logging() -> None:
     handler.setLevel(logging.DEBUG)
     handler.setFormatter(formatter)
     root_logger.addHandler(handler)
+
 
 def download_logs() -> None:
     """Download logs to a user-specified location."""

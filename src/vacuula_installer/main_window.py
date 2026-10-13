@@ -71,6 +71,7 @@ from vacuula_installer.widgets.logo import LogoWidget
 
 logger = logging.getLogger(__name__)
 
+
 def _clear_graphics_effect(widget: QWidget) -> None:
     # Pyside has annoying stub, this gets rid of errors shown by linter
     # QT documents None as proper way to clear effect: https://doc.qt.io/qt-6/qgraphicsitem.html#setGraphicsEffect
@@ -129,9 +130,7 @@ class MainWindow(QMainWindow):
         self._firmware_update_screen = FirmwareUpdateScreen(self._translator, self._right_panel)
         self._screen_stack.addWidget(self._firmware_update_screen)
 
-        self._server_search_screen = FindServerScreen(
-            self._translator, self._right_panel
-        )
+        self._server_search_screen = FindServerScreen(self._translator, self._right_panel)
         self._screen_stack.addWidget(self._server_search_screen)
 
         self._connect_to_wifi_screen = WifiScreen(self._translator, self._right_panel)
@@ -164,7 +163,9 @@ class MainWindow(QMainWindow):
         self._download_logs.clicked.connect(download_logs)
         self._download_logs.setObjectName("statusLabel")
         self._download_logs.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self._download_logs.setGeometry(0, self._version_label.y() + self._version_label.height(), self._left_panel_rect().width(), 24)
+        self._download_logs.setGeometry(
+            0, self._version_label.y() + self._version_label.height(), self._left_panel_rect().width(), 24
+        )
         self._download_logs.hide()
 
         self._robot_detector = RobotDetector(self)
@@ -284,9 +285,7 @@ class MainWindow(QMainWindow):
 
     def _connect_signals(self) -> None:
         # TODO: conditionally skip pages if session is already populated? Or recheck?
-        self._welcome_screen.continueRequested.connect(
-            self._select_dev_or_server_screen
-        )
+        self._welcome_screen.continueRequested.connect(self._select_dev_or_server_screen)
         self._disclaimer_screen.understandRequested.connect(self._goto_server_search_screen)
 
         self._server_detector.serverDetected.connect(self._on_server_detected)
@@ -296,21 +295,14 @@ class MainWindow(QMainWindow):
 
         self._robot_detector.gen23VersionText.connect(lambda text: setattr(self._session, "firmware_version", text))
         self._robot_detector.robotDetected.connect(self._start_firmware_detect)
-        self._robot_detector.multipleRobotsDetected.connect(
-            self._handle_multiple_robots
-        )
-        self._robot_detector.robotDisconnected.connect(
-            self._handle_robot_disconnected
-        )
+        self._robot_detector.multipleRobotsDetected.connect(self._handle_multiple_robots)
+        self._robot_detector.robotDisconnected.connect(self._handle_robot_disconnected)
 
         self._firmware_detector.firmwareDetected.connect(self._on_firmware)
 
         self._ap_poller.infoReceived.connect(self._on_robot_ap_reached)
-        self._ap_poller.requestFailed.connect(
-            lambda: self._connect_to_wifi_screen.set_prewifi_checking(False)
-        )
+        self._ap_poller.requestFailed.connect(lambda: self._connect_to_wifi_screen.set_prewifi_checking(False))
         self._connect_to_wifi_screen.prewifiConnectedClicked.connect(self._on_prewifi_connected_clicked)
-
 
         self._ap_poller.networksReceived.connect(self._connect_to_wifi_screen.set_gen23_wifi_options)
         self._ap_poller.networksFailed.connect(self._connect_to_wifi_screen.set_gen23_wifi_failed)
@@ -335,9 +327,7 @@ class MainWindow(QMainWindow):
         self._firmware_updater.installFailed.connect(self._firmware_update_screen.set_install_failed)
         self._firmware_updater.installFinished.connect(self._on_firmware_install_finished)
 
-        self._server_search_screen.manualConnectionTestRequested.connect(
-            self._server_detector.check_manual
-        )
+        self._server_search_screen.manualConnectionTestRequested.connect(self._server_detector.check_manual)
 
     def _on_server_detected(self, ip: str, cert: str, port: int, gen4_port: int, manual: bool) -> None:
         self._session.server_ip_manual = manual
@@ -370,8 +360,10 @@ class MainWindow(QMainWindow):
         self._provisioner.stop()
         self._gen23_wifi_fixer.stop()
         self._firmware_detector.stop()
-    
-        self._firmware_update_screen.page = "" # TODO: hack to not make disconnect, might not be needed actually? dont know, look into after initial release
+
+        self._firmware_update_screen.page = (
+            ""  # TODO: hack to not make disconnect, might not be needed actually? dont know, look into after initial release
+        )
 
         self._error_screen.show_error(message, detailed=detailed, restart_btn=restart_btn)
         self._crossfade_to(self._error_screen)
@@ -475,7 +467,7 @@ class MainWindow(QMainWindow):
             self._crossfade_to(self._firmware_update_screen)
             self._firmware_update_screen.set_generation(self.get_gen())
         else:
-            #TODO: check if link is clickable here (error.firmware.help)
+            # TODO: check if link is clickable here (error.firmware.help)
             self._show_error(msg, detailed="error.firmware.help" if msg == "error.firmware.invalid" else "error.generic.help")
 
     def _select_dev_or_server_screen(self) -> None:
@@ -489,7 +481,7 @@ class MainWindow(QMainWindow):
             #self._firmware_update_screen.set_generation('gen3')
             # self._show_error("firmware.gen3.factory_reset.disconnected", detailed=True, restart_btn="firmware.gen3.factory_reset.restart")
             # self._goto_connect_robot_screen('123', '123', 123, 123)  # Not implemented yet
-            
+
             # self._goto_connect_robot_screen('', '')  # Not implemented yet
             # self._crossfade_to(self._connect_to_wifi_screen)
             # self._connect_to_wifi_screen.set_gen23_prewifi_page()
@@ -537,7 +529,9 @@ class MainWindow(QMainWindow):
         self._session.robot_usb_device = device
         self._connect_screen.show_robot_detected(display_name)
         # self._robot_detector.stop()  # keep this running to detect disconnects!
-        self._firmware_detector.detect(device, self._session.firmware_version) # TODO: clean this up, pass because of the gen23 variants
+        self._firmware_detector.detect(
+            device, self._session.firmware_version
+        )  # TODO: clean this up, pass because of the gen23 variants
 
     def _handle_multiple_robots(self) -> None:
         self._show_error("error.multiple_robots", detailed=True)
@@ -579,13 +573,7 @@ class MainWindow(QMainWindow):
         match self._session.robot_model_display_name:
             case "Neato D10" | "Neato D9" | "Neato D8" | "Neato D800":
                 return "gen4"
-            case (
-                "Neato Botvac D7"
-                | "Neato Botvac D6"
-                | "Neato Botvac D5"
-                | "Neato Botvac D4"
-                | "Neato Botvac D3"
-            ):
+            case "Neato Botvac D7" | "Neato Botvac D6" | "Neato Botvac D5" | "Neato Botvac D4" | "Neato Botvac D3":
                 return "gen3"
             case "Neato Botvac Connected":
                 return "gen2"

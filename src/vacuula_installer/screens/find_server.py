@@ -202,9 +202,7 @@ class FindServerScreen(QWidget):
         self._try_connection_button.setEnabled(True)
         self._enter_ip_button.show()
 
-    def _fade_text_colour(
-        self, label: QLabel, start_hex: str, end_hex: str, duration_ms: int = 1000
-    ):
+    def _fade_text_colour(self, label: QLabel, start_hex: str, end_hex: str, duration_ms: int = 1000):
         anim = QVariantAnimation(parent=label)
         anim.setStartValue(QColor(start_hex))
         anim.setEndValue(QColor(end_hex))
@@ -221,19 +219,11 @@ class FindServerScreen(QWidget):
 
     def show_server_detected(self, ip: str) -> QParallelAnimationGroup:
         self._x_mark.setText("🔗")
-        self._x_mark.setStyleSheet(
-            "font-size: 32px;"
-        )  # Anoyingly 🔗 is bigger than ✕ for a given fontsize.. Empiric match
+        self._x_mark.setStyleSheet("font-size: 32px;")  # Anoyingly 🔗 is bigger than ✕ for a given fontsize.. Empiric match
         self._spinner.stop()
-        self._status_label.setText(
-            self._translator.tr("serversearch.status.found", ip=ip)
-        )
-        color_anim1 = self._fade_text_colour(
-            self._dots_left, PALETTE.text_muted, "#1dd73c", 1300
-        )
-        color_anim2 = self._fade_text_colour(
-            self._dots_right, PALETTE.text_muted, "#1dd73c", 1300
-        )
+        self._status_label.setText(self._translator.tr("serversearch.status.found", ip=ip))
+        color_anim1 = self._fade_text_colour(self._dots_left, PALETTE.text_muted, "#1dd73c", 1300)
+        color_anim2 = self._fade_text_colour(self._dots_right, PALETTE.text_muted, "#1dd73c", 1300)
         group = QParallelAnimationGroup()
         group.addAnimation(color_anim2)
         group.addAnimation(color_anim1)
@@ -276,9 +266,7 @@ class FindServerScreen(QWidget):
         else:
             self._manual_ip_input.setEnabled(True)
             self._try_connection_button.setEnabled(True)
-            self._manual_ip_status_label.setText(
-                message or self._translator.tr("serversearch.manual.failed")
-            )
+            self._manual_ip_status_label.setText(message or self._translator.tr("serversearch.manual.failed"))
             self._manual_ip_status_label.show()
 
     # Part of getting title textwidth as limit for other Qlabels
@@ -325,10 +313,6 @@ class FindServerScreen(QWidget):
         self._apply_label_margins()
 
         if self._server_ip is None:
-            self._status_label.setText(
-                self._translator.tr("serversearch.status.searching")
-            )
+            self._status_label.setText(self._translator.tr("serversearch.status.searching"))
         else:
-            self._status_label.setText(
-                self._translator.tr("serversearch.status.found", ip=self._server_ip)
-            )
+            self._status_label.setText(self._translator.tr("serversearch.status.found", ip=self._server_ip))

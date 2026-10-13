@@ -16,13 +16,12 @@ PRODUCT_ID = 0x0100
 
 # install path -> local filename, inside scripts/gen4
 FILES = {
-    '/usr/sbin/enable_vacuula_shell.sh': 'enable_vacuula_shell.sh',
-    '/usr/sbin/enable_vacuula_full.sh': 'enable_vacuula_full.sh',
-    '/lib/systemd/system/usb-gadgets.service': 'usb-gadgets.service',
-    '/etc/systemd/resolved.conf': 'resolved.conf',
-    '/etc/nsswitch.conf': 'nsswitch.conf',
-    '/user/tron/local.ini': 'local.ini',
-    '/etc/systemd/network/wireless.network': 'wireless.network',
+    "/usr/sbin/enable_vacuula_shell.sh": "enable_vacuula_shell.sh",
+    "/usr/sbin/enable_vacuula_full.sh": "enable_vacuula_full.sh",
+    "/lib/systemd/system/usb-gadgets.service": "usb-gadgets.service",
+    "/etc/systemd/resolved.conf": "resolved.conf",
+    "/etc/nsswitch.conf": "nsswitch.conf",
+    "/etc/systemd/network/wireless.network": "wireless.network",
 }
 
 
@@ -37,12 +36,12 @@ class Gen4Provisioner(QObject):
     """Pushes the vacuula install files to a Gen4 robot over MTP.
     Runs on a worker thread so the GUI doesn't freeze during the transfer."""
 
-    stepChanged = Signal(int) # 1 connect, 2 upload
+    stepChanged = Signal(int)  # 1 connect, 2 upload
     provisioningFailed = Signal(str)
     provisioningFinished = Signal()
 
-    _step = Signal(int)      # worker thread -> GUI thread
-    _done = Signal(object)   # str | None -- failed stage, or None on success
+    _step = Signal(int)  # worker thread -> GUI thread
+    _done = Signal(object)  # str | None -- failed stage, or None on success
 
     def __init__(
         self,
@@ -82,6 +81,7 @@ class Gen4Provisioner(QObject):
         self._step.emit(1)  # connecting
         if sys.platform == "win32":
             from vacuula_installer.core.mtp.windows import WindowsMtpDevice
+
             serial_number = RobotDetector._get_serial(dev)
             mtp = WindowsMtpDevice(serial_number)
             mtp.open_session(1)
@@ -109,7 +109,7 @@ class Gen4Provisioner(QObject):
     def _install_static_files(self, mtp: MtpDevice | WindowsMtpDevice, storage_id: int) -> None:
         # install static files
         for install_path, local_path in FILES.items():
-            with open(SCRIPTS_DIR / "gen4" / local_path, 'rb') as f:
+            with open(SCRIPTS_DIR / "gen4" / local_path, "rb") as f:
                 mtp.send_file(install_path, storage_id, f.read())
 
     def _set_vacuula_server(self, mtp: MtpDevice | WindowsMtpDevice, storage_id: int) -> None:
@@ -123,11 +123,11 @@ class Gen4Provisioner(QObject):
             check_host = {self.vacuula_server}
             check_port = {self.vacuula_port}
             check_timeout = 10
-            """).encode('utf-8')
-        mtp.send_file('/home/root/tron/config/vendors.ini', storage_id, new_config)
+            """).encode("utf-8")
+        mtp.send_file("/home/root/tron/config/vendors.ini", storage_id, new_config)
 
         # install certificate
-        mtp.send_file('/home/root/tron/config/ssl/vacuula.crt', storage_id, self.vacuula_cert)
+        mtp.send_file("/home/root/tron/config/ssl/vacuula.crt", storage_id, self.vacuula_cert)
 
     def _set_wifi(self, mtp: MtpDevice | WindowsMtpDevice, storage_id: int) -> None:
         # update Wifi (optional)
@@ -142,8 +142,8 @@ class Gen4Provisioner(QObject):
                     scan_ssid=1
                     psk="{self.wifi_psk}"
 }}
-            """).encode('utf-8')
-        mtp.send_file('/etc/wpa_supplicant/wpa_supplicant-wlan0.conf', storage_id, wifi_config)
+            """).encode("utf-8")
+        mtp.send_file("/etc/wpa_supplicant/wpa_supplicant-wlan0.conf", storage_id, wifi_config)
 
     def _set_hosts(self, mtp: MtpDevice | WindowsMtpDevice, storage_id: int) -> None:
         # update hosts file and add dns entry to resolve vacuula.local if ip was manually entered
@@ -163,10 +163,10 @@ class Gen4Provisioner(QObject):
             ff02::2 ip6-allrouters
             127.0.1.1 imx8mnlego-ddr4
 
-            {vacuula_block}
-            """).encode('utf-8')
-        mtp.send_file('/etc/hosts', storage_id, hosts_config)
-
+            # Vacuula server
+            {self.vacuula_server_ip} vacuula.local
+            """).encode("utf-8")
+        mtp.send_file("/etc/hosts", storage_id, hosts_config)
 
     def _on_step(self, step: int) -> None:
         if self._active:
