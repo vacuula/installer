@@ -58,6 +58,8 @@ def build_app_icon() -> QIcon:
 
 def _set_windows_app_user_model_id() -> None:
     try:
+        if sys.platform != "win32":
+            return
         import ctypes
 
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(WINDOWS_APP_USER_MODEL_ID)
