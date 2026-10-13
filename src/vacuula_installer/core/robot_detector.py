@@ -179,7 +179,7 @@ class RobotDetector(QObject):
         self._last_state = State.NONE
         self._resolved_cache.clear()
 
-    def _update_robots(self) -> None:  # ruff: ignore[C901]
+    def _update_robots(self) -> None:
         # GEN4_USB and GEN23_USB entries share one (idVendor, idProduct)
         # pair each, so query USB once per unique pair rather than once
         # per ROBOT_IDS entry.
