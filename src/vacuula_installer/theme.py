@@ -281,7 +281,7 @@ QMessageBox, QDialog {{
     background-color: {PALETTE.bg_colour};
 }}
 
-"""
+"""  # noqa: E501
 
 
 def apply_app_palette(app: QApplication) -> None:

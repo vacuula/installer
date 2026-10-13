@@ -179,7 +179,7 @@ class RobotDetector(QObject):
         self._last_state = State.NONE
         self._resolved_cache.clear()
 
-    def _update_robots(self) -> None:
+    def _update_robots(self) -> None:  # ruff: ignore[C901]
         # GEN4_USB and GEN23_USB entries share one (idVendor, idProduct)
         # pair each, so query USB once per unique pair rather than once
         # per ROBOT_IDS entry.
@@ -241,7 +241,8 @@ class RobotDetector(QObject):
         pair - so also check the manufacturer/product string descriptors.
         """
         if sys.platform == "win32":
-            return True  # windows cannot open and read, verify by serial existing. TODO: make sure other mtp devices wont show up as robots
+            return True  # windows cannot open and read, verify by serial existing.
+            # TODO: make sure other mtp devices wont show up as robots
         try:
             manufacturer = usb.util.get_string(dev, dev.iManufacturer) if dev.iManufacturer else None  # ty: ignore[unresolved-attribute]
             product = usb.util.get_string(dev, dev.iProduct) if dev.iProduct else None  # ty: ignore[unresolved-attribute]
