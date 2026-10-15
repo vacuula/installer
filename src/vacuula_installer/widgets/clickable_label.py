@@ -7,8 +7,6 @@ class ClickableLabel(QLabel):
     clicked = Signal()
 
     def mouseReleaseEvent(self, event: QMouseEvent) -> None:
-        if event.button() == Qt.MouseButton.LeftButton and self.rect().contains(
-            event.position().toPoint()
-        ):
+        if event.button() == Qt.MouseButton.LeftButton and self.rect().contains(event.position().toPoint()):
             self.clicked.emit()
         super().mouseReleaseEvent(event)

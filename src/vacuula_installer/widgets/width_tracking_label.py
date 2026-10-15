@@ -5,6 +5,7 @@ from PySide6.QtWidgets import QLabel
 
 class WidthTrackingLabel(QLabel):
     """QLabel that announces changes to its own width."""
+
     # I was having problems with text width not updating,
     # turns out resizes are lazyloaded so made explicit
 

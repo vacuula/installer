@@ -4,6 +4,7 @@ Can be used to detect disconnection, care about polling rate
 
 Lots here was generated using claude sonnet, for example the cross platform serial stuff cause I could not bother
 """
+
 from __future__ import annotations
 
 import logging
@@ -25,21 +26,17 @@ logger = logging.getLogger(__name__)
 
 # idVendor, idProduct
 GEN4_USB = [0x1D6B, 0x0100]
-GEN23_USB = [0x2108, 0x780c]
+GEN23_USB = [0x2108, 0x780C]
 
 SERIAL_BAUDRATE = 115200
 SERIAL_TIMEOUT_S = 1.0
 GET_VERSION_CMD = b"GetVersion\n"
 
 if sys.platform == "win32":
-    USB_BACKEND = usb.backend.libusb1.get_backend(
-        find_library=lambda _: str(LIBUSB_DLL)
-    )
+    USB_BACKEND = usb.backend.libusb1.get_backend(find_library=lambda _: str(LIBUSB_DLL))
 
     if USB_BACKEND is None:
-        raise RuntimeError(
-            f"Could not load libusb backend from {LIBUSB_DLL}"
-        )
+        raise RuntimeError(f"Could not load libusb backend from {LIBUSB_DLL}")
 else:
     USB_BACKEND = None
 
@@ -60,16 +57,82 @@ class RobotUsbId:
 
 
 ROBOT_IDS: tuple[RobotUsbId, ...] = (
-    RobotUsbId(usb_idVendor=GEN4_USB[0], usb_idProduct=GEN4_USB[1], display_name="Neato D10", usb_iSerial_part="N2", usb_iSerial_part_pos=4),
-    RobotUsbId(usb_idVendor=GEN4_USB[0], usb_idProduct=GEN4_USB[1], display_name="Neato D9", usb_iSerial_part="N1", usb_iSerial_part_pos=4),
-    RobotUsbId(usb_idVendor=GEN4_USB[0], usb_idProduct=GEN4_USB[1], display_name="Neato D8", usb_iSerial_part="N3", usb_iSerial_part_pos=4),
-    RobotUsbId(usb_idVendor=GEN4_USB[0], usb_idProduct=GEN4_USB[1], display_name="Neato D800", usb_iSerial_part="N5", usb_iSerial_part_pos=4),
-    RobotUsbId(usb_idVendor=GEN23_USB[0], usb_idProduct=GEN23_USB[1], display_name="Neato Botvac D7", usb_iManufacturer="Acme Corporation", usb_iProduct="CDC Serial Peripheral", serial_model="BotVacD7Connected"),
-    RobotUsbId(usb_idVendor=GEN23_USB[0], usb_idProduct=GEN23_USB[1], display_name="Neato Botvac D6", usb_iManufacturer="Acme Corporation", usb_iProduct="CDC Serial Peripheral", serial_model="BotVacD6Connected"),
-    RobotUsbId(usb_idVendor=GEN23_USB[0], usb_idProduct=GEN23_USB[1], display_name="Neato Botvac D5", usb_iManufacturer="Acme Corporation", usb_iProduct="CDC Serial Peripheral", serial_model="BotVacD5Connected"),
-    RobotUsbId(usb_idVendor=GEN23_USB[0], usb_idProduct=GEN23_USB[1], display_name="Neato Botvac D4", usb_iManufacturer="Acme Corporation", usb_iProduct="CDC Serial Peripheral", serial_model="BotVacD4Connected"),
-    RobotUsbId(usb_idVendor=GEN23_USB[0], usb_idProduct=GEN23_USB[1], display_name="Neato Botvac D3", usb_iManufacturer="Acme Corporation", usb_iProduct="CDC Serial Peripheral", serial_model="BotVacD3Connected"),
-    RobotUsbId(usb_idVendor=GEN23_USB[0], usb_idProduct=GEN23_USB[1], display_name="Neato Botvac Connected", usb_iManufacturer="Acme Corporation", usb_iProduct="CDC Serial Peripheral", serial_model="BotVacConnected"),
+    RobotUsbId(
+        usb_idVendor=GEN4_USB[0],
+        usb_idProduct=GEN4_USB[1],
+        display_name="Neato D10",
+        usb_iSerial_part="N2",
+        usb_iSerial_part_pos=4,
+    ),
+    RobotUsbId(
+        usb_idVendor=GEN4_USB[0],
+        usb_idProduct=GEN4_USB[1],
+        display_name="Neato D9",
+        usb_iSerial_part="N1",
+        usb_iSerial_part_pos=4,
+    ),
+    RobotUsbId(
+        usb_idVendor=GEN4_USB[0],
+        usb_idProduct=GEN4_USB[1],
+        display_name="Neato D8",
+        usb_iSerial_part="N3",
+        usb_iSerial_part_pos=4,
+    ),
+    RobotUsbId(
+        usb_idVendor=GEN4_USB[0],
+        usb_idProduct=GEN4_USB[1],
+        display_name="Neato D800",
+        usb_iSerial_part="N5",
+        usb_iSerial_part_pos=4,
+    ),
+    RobotUsbId(
+        usb_idVendor=GEN23_USB[0],
+        usb_idProduct=GEN23_USB[1],
+        display_name="Neato Botvac D7",
+        usb_iManufacturer="Acme Corporation",
+        usb_iProduct="CDC Serial Peripheral",
+        serial_model="BotVacD7Connected",
+    ),
+    RobotUsbId(
+        usb_idVendor=GEN23_USB[0],
+        usb_idProduct=GEN23_USB[1],
+        display_name="Neato Botvac D6",
+        usb_iManufacturer="Acme Corporation",
+        usb_iProduct="CDC Serial Peripheral",
+        serial_model="BotVacD6Connected",
+    ),
+    RobotUsbId(
+        usb_idVendor=GEN23_USB[0],
+        usb_idProduct=GEN23_USB[1],
+        display_name="Neato Botvac D5",
+        usb_iManufacturer="Acme Corporation",
+        usb_iProduct="CDC Serial Peripheral",
+        serial_model="BotVacD5Connected",
+    ),
+    RobotUsbId(
+        usb_idVendor=GEN23_USB[0],
+        usb_idProduct=GEN23_USB[1],
+        display_name="Neato Botvac D4",
+        usb_iManufacturer="Acme Corporation",
+        usb_iProduct="CDC Serial Peripheral",
+        serial_model="BotVacD4Connected",
+    ),
+    RobotUsbId(
+        usb_idVendor=GEN23_USB[0],
+        usb_idProduct=GEN23_USB[1],
+        display_name="Neato Botvac D3",
+        usb_iManufacturer="Acme Corporation",
+        usb_iProduct="CDC Serial Peripheral",
+        serial_model="BotVacD3Connected",
+    ),
+    RobotUsbId(
+        usb_idVendor=GEN23_USB[0],
+        usb_idProduct=GEN23_USB[1],
+        display_name="Neato Botvac Connected",
+        usb_iManufacturer="Acme Corporation",
+        usb_iProduct="CDC Serial Peripheral",
+        serial_model="BotVacConnected",
+    ),
 )
 
 
@@ -90,7 +153,7 @@ class RobotDetector(QObject):
 
     robotDisconnected = Signal()
     robotDetected = Signal(str, usb.core.Device)  # display_name, serial_device TODO, usb_device
-    gen23VersionText = Signal(str) # temp solution, should be looked over how exactly this should be fetched and saved
+    gen23VersionText = Signal(str)  # temp solution, should be looked over how exactly this should be fetched and saved
 
     # Probably never happens but needs to be handled:
     multipleRobotsDetected = Signal()
@@ -140,7 +203,6 @@ class RobotDetector(QObject):
             robot_id = self._resolve_robot(dev, descriptor_matches)
             if robot_id is not None:
                 resolved.append((dev, robot_id))
-           
 
         gen23_devices = usb.core.find(find_all=True, idVendor=GEN23_USB[0], idProduct=GEN23_USB[1], backend=USB_BACKEND)
         for dev in gen23_devices if gen23_devices is not None else []:
@@ -149,11 +211,10 @@ class RobotDetector(QObject):
                 logger.debug("usb.core.find returned non-Device for GEN2/GEN3 device")
                 continue
 
-            descriptor_matches = [c for c in ids_by_usb_id[(0x2108, 0x780c)]]
+            descriptor_matches = [c for c in ids_by_usb_id[(0x2108, 0x780C)]]
             robot_id = self._resolve_robot(dev, descriptor_matches)
             if robot_id is not None:
                 resolved.append((dev, robot_id))
-
 
         if len(resolved) == 0:
             if self._last_state == State.ONE:
@@ -195,7 +256,7 @@ class RobotDetector(QObject):
         way to resolve it.
         """
         usb_id = [dev.idVendor, dev.idProduct]  # ty: ignore[unresolved-attribute]
-        
+
         if usb_id == GEN4_USB:
             return self._match_by_usb_serial(dev, candidates)
 
@@ -275,9 +336,7 @@ class RobotDetector(QObject):
         return raw.decode("ascii", errors="ignore")
 
     @staticmethod
-    def write_cmd_port_wait_terminator(
-        port_name: str, cmd: str, terminator: bytes = b"\x1A", timeout: float = 10.0
-    ) -> str:
+    def write_cmd_port_wait_terminator(port_name: str, cmd: str, terminator: bytes = b"\x1a", timeout: float = 10.0) -> str:
         with serial.Serial(port_name, baudrate=SERIAL_BAUDRATE, timeout=0.2) as ser:
             ser.reset_input_buffer()
             ser.write(cmd.encode("ascii") + b"\n")
@@ -290,9 +349,7 @@ class RobotDetector(QObject):
                     buf += chunk
                     if terminator in buf:
                         return buf.decode("ascii", errors="ignore")
-            raise TimeoutError(
-                f"timed out waiting for terminator {terminator!r}; got {bytes(buf)!r}"
-            )
+            raise TimeoutError(f"timed out waiting for terminator {terminator!r}; got {bytes(buf)!r}")
 
     @staticmethod
     def _query_get_version(dev: usb.core.Device) -> str | None:
@@ -306,6 +363,7 @@ class RobotDetector(QObject):
                 # Gen4 may expose only MTP (no COM port), so ask Windows'
                 # device list instead. Works for both USB layouts.
                 from vacuula_installer.core.mtp.windows import present_robot_serials
+
                 try:
                     serials = present_robot_serials()
                 except Exception:  # noqa: BLE001
@@ -316,10 +374,7 @@ class RobotDetector(QObject):
                 if serials:
                     return ""  # several robots: can't tell which libusb device is which
             # Fallback (and gen2/3): serial number of the robot's COM port.
-            ports = [
-                p for p in serial.tools.list_ports.comports()
-                if p.vid == dev.idVendor and p.pid == dev.idProduct
-            ]
+            ports = [p for p in serial.tools.list_ports.comports() if p.vid == dev.idVendor and p.pid == dev.idProduct]
             return (ports[0].serial_number or "") if len(ports) == 1 else ""
         try:
             serial_number = dev.serial_number

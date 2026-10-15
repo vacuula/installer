@@ -37,9 +37,7 @@ class _WhitespaceHighlighter(QSyntaxHighlighter):
     def __init__(self, document: QTextDocument) -> None:
         super().__init__(document)
         self._format = QTextCharFormat()
-        self._format.setUnderlineStyle(
-            QTextCharFormat.UnderlineStyle.SpellCheckUnderline
-        )
+        self._format.setUnderlineStyle(QTextCharFormat.UnderlineStyle.SpellCheckUnderline)
         self._format.setUnderlineColor(PALETTE.accent_green)
 
     def highlightBlock(self, text: str) -> None:
@@ -82,9 +80,7 @@ class SsidInput(QPlainTextEdit):
         # Clanker provided fix
         self.ensurePolished()
         margins = self.contentsMargins()
-        self.setFixedHeight(
-            self.fontMetrics().height() + margins.top() + margins.bottom()
-        )
+        self.setFixedHeight(self.fontMetrics().height() + margins.top() + margins.bottom())
 
     def is_valid(self) -> bool:
         """True if the current text is 1-32 bytes once UTF-8 encoded."""
@@ -98,9 +94,7 @@ class SsidInput(QPlainTextEdit):
 
     def insertFromMimeData(self, source: QMimeData) -> None:
         # Only one line ssid:s, no newlines allowed
-        text = (
-            source.text().replace("\r\n", " ").replace("\n", " ").replace("\r", " ")
-        )  # support of multiple os jank
+        text = source.text().replace("\r\n", " ").replace("\n", " ").replace("\r", " ")  # support of multiple os jank
         self.textCursor().insertText(text)
 
     def _enforce_byte_limit(self) -> None:

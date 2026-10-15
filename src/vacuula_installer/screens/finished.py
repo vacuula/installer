@@ -38,6 +38,7 @@ LINK_BUTTONS: tuple[LinkButtonSpec, ...] = (
     LinkButtonSpec(KOFI_SVG, "Ko-Fi", "https://ko-fi.com/V7V61PBIY6"),
 )
 
+
 class CircleLinkButton(QPushButton):
     """A round, outlined button with a centered svg icon. Click opens `url`
     in the system browser; hover shows the translated tooltip."""
@@ -84,9 +85,7 @@ class FinishedScreen(QWidget):
 
         self._icon_label = QLabel("🎉", self)
         self._icon_label.setObjectName("errorIconLabel")
-        self._icon_label.setStyleSheet(
-            "font-size: 45px;"
-        )
+        self._icon_label.setStyleSheet("font-size: 45px;")
         self._icon_label.setAlignment(Qt.AlignmentFlag.AlignHCenter)
 
         self._finished_title = QLabel(self)
