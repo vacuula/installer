@@ -147,10 +147,14 @@ class Gen4Provisioner(QObject):
 
     def _set_hosts(self, mtp: MtpDevice | WindowsMtpDevice, storage_id: int) -> None:
         # update hosts file and add dns entry to resolve vacuula.local if ip was manually entered
-        vacuula_block = dedent(f"""\
+        vacuula_block = (
+            dedent(f"""\
         # Vacuula server
         {self.vacuula_server_ip} vacuula.local
-        """) if self.manual_ip else ""
+        """)
+            if self.manual_ip
+            else ""
+        )
 
         hosts_config = dedent(f"""\
             127.0.0.1	localhost.localdomain		localhost

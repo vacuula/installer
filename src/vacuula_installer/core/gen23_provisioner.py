@@ -38,9 +38,9 @@ MILESTONES: tuple[Milestone, ...] = (
     Milestone("[[vacuula-installer-finished]]", "provision.gen23.milestone.finished", step=4, final=True),
 )
 
-SCRIPT_FAILED = "[[vacuula-installer-failed]]" # detect when fail
-LOCK_EXIT = "[[vacuula-installer-lock-exit]]" # script should not run multiple times
-MAX_LOCK_EXIT_BEFORE_FAIL = 5 # if more then this many lock exit, then user never rebooted their robot like they were asked...
+SCRIPT_FAILED = "[[vacuula-installer-failed]]"  # detect when fail
+LOCK_EXIT = "[[vacuula-installer-lock-exit]]"  # script should not run multiple times
+MAX_LOCK_EXIT_BEFORE_FAIL = 5  # if more then this many lock exit, then user never rebooted their robot like they were asked...
 
 logger = logging.getLogger(__name__)
 

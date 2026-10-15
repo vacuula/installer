@@ -248,7 +248,7 @@ class FirmwareUpdateScreen(QWidget):
         self._retry_kind = None
         self._progress_bar.setValue(0)
         self._progress_bar.setRange(0, 100)
-        self._button_group.setExclusive(False) #TODO why this?
+        self._button_group.setExclusive(False)  # TODO why this?
         for option in self._options:
             option.radio.setChecked(False)
         self._button_group.setExclusive(True)

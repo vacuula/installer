@@ -448,10 +448,10 @@ class MainWindow(QMainWindow):
         logger.error(f"Provisioning failed at: {stage}, step: {self._provision_screen_gen23._step}")
         # self._provision_screen_gen23.set_failed()
         # TODO: clean this up
-        if (self._provision_screen_gen23._step == 1):
+        if self._provision_screen_gen23._step == 1:
             self._show_error("error.provision.gen23.wifi_password", detailed="error.generic.help")
-        elif (self._provision_screen_gen23._step == 2):
-            self._show_error("error.provision.gen23.no_internet", detailed="error.generic.help") # need ntp and 8.8.8.8 check
+        elif self._provision_screen_gen23._step == 2:
+            self._show_error("error.provision.gen23.no_internet", detailed="error.generic.help")  # need ntp and 8.8.8.8 check
         else:
             self._show_error(f"error.provision.{stage}", detailed="error.generic.help")
         # self._set_back_action(self._back_to_wifi)
@@ -473,12 +473,12 @@ class MainWindow(QMainWindow):
     def _select_dev_or_server_screen(self) -> None:
         if not getattr(sys, "frozen", False):
             self._goto_notice_screen()
-            #self._crossfade_to(self._connect_to_wifi_screen)
-            #self._connect_to_wifi_screen.set_gen23_page()
-            
+            # self._crossfade_to(self._connect_to_wifi_screen)
+            # self._connect_to_wifi_screen.set_gen23_page()
+
             # self._goto_dev_only_screen() # Temporary
-            #self._crossfade_to(self._firmware_update_screen)
-            #self._firmware_update_screen.set_generation('gen3')
+            # self._crossfade_to(self._firmware_update_screen)
+            # self._firmware_update_screen.set_generation('gen3')
             # self._show_error("firmware.gen3.factory_reset.disconnected", detailed=True, restart_btn="firmware.gen3.factory_reset.restart")
             # self._goto_connect_robot_screen('123', '123', 123, 123)  # Not implemented yet
 
@@ -540,9 +540,15 @@ class MainWindow(QMainWindow):
         if self._session.install_done:
             self._goto_finished_screen()
         elif self._firmware_update_screen.page == "factory_reset":
-            self._show_error("firmware.gen3.factory_reset.disconnected", detailed=True, restart_btn="firmware.gen3.factory_reset.restart")
+            self._show_error(
+                "firmware.gen3.factory_reset.disconnected", detailed=True, restart_btn="firmware.gen3.factory_reset.restart"
+            )
         elif self._firmware_update_screen.page == "done":
-            self._show_error(f"firmware.install.done.disconnected.{self.get_gen()}", detailed=True, restart_btn="firmware.install.done.restart")
+            self._show_error(
+                f"firmware.install.done.disconnected.{self.get_gen()}",
+                detailed=True,
+                restart_btn="firmware.install.done.restart",
+            )
         else:
             self._show_error("error.robot_disconnected", detailed=True)
 

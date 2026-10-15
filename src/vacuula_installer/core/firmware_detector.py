@@ -21,6 +21,7 @@ VALID_GEN4_VERSIONS = [
 
 logger = logging.getLogger(__name__)
 
+
 class FirmwareDetector(QObject):
     _done = Signal(bool, str)  # worker thread -> GUI thread
     firmwareDetected = Signal(
