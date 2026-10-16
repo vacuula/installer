@@ -2,9 +2,9 @@
 export PATH=/sbin:/bin:/usr/sbin:/usr/bin
 
 # Fix file permissions
-chmod a+r /usr/sbin/enable_vacuula.sh
 chmod a+r /usr/sbin/vacuula_logs.sh
 chmod a+r /lib/systemd/system/usb-gadgets.service
+chmod a+r /etc/systemd/system/vacuula-logs.service
 chmod a+r /etc/systemd/resolved.conf
 chmod a+r /etc/systemd/network/wireless.network
 chmod a+r /home/root/tron/config/vendors.ini
@@ -31,3 +31,8 @@ ln -sf ../run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
 # this is to avoid burning out any motors or other components. Also, we have no idea of the D800 and so, so will need to be verified after
 # initial release!
 rm -f /user/databases/settings_D9
+
+# run our extra services
+systemctl daemon-reload
+systemctl enable vacuula-logs.service
+systemctl start --no-block vacuula-logs.service

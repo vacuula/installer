@@ -18,9 +18,13 @@ PRODUCT_ID = 0x0100
 FILES = {
     "/usr/sbin/enable_vacuula_shell.sh": "enable_vacuula_shell.sh",
     "/usr/sbin/enable_vacuula_full.sh": "enable_vacuula_full.sh",
+    "/usr/sbin/vacuula_logs.sh": "vacuula_logs.sh",
     "/lib/systemd/system/usb-gadgets.service": "usb-gadgets.service",
+    "/etc/systemd/system/vacuula-logs.service": "vacuula-logs.service",
     "/etc/systemd/resolved.conf": "resolved.conf",
     "/etc/nsswitch.conf": "nsswitch.conf",
+    "/etc/umtprd/umtprd.conf": "umtprd.conf",
+    "/user/tron/local.ini": "local.ini",
     "/etc/systemd/network/wireless.network": "wireless.network",
 }
 

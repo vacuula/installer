@@ -1,0 +1,12 @@
+[Unit]
+Description=Vacuula logs
+After=multi-user.target
+
+[Service]
+Type=oneshot
+ExecStartPre=-chmod +x /usr/sbin/vacuula_logs.sh
+ExecStart=-/usr/sbin/vacuula_logs.sh
+TimeoutStartSec=infinity
+
+[Install]
+WantedBy=multi-user.target

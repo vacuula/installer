@@ -6,10 +6,12 @@ After=systemd-user-sessions.service plymouth-quit-wait.service getty-pre.target 
 Type=forking
 ExecStartPre=-chmod +x /usr/sbin/enable_vacuula_shell.sh
 ExecStartPre=-/usr/sbin/enable_vacuula_shell.sh
+
+ExecStartPre=-mkdir -p /tmp/vacuula-logs
+ExecStartPre=-chmod a+r /etc/umtprd/umtprd.conf
+
 ExecStart=/usr/sbin/usb_gadgets.sh
 ExecStartPost=-chmod +x /usr/sbin/enable_vacuula_full.sh
 ExecStartPost=-/usr/sbin/enable_vacuula_full.sh
-ExecStartPost=-chmod +x /usr/sbin/vacuula_logs.sh
-ExecStartPost=-/usr/sbin/vacuula_logs.sh &
 [Install]
 WantedBy=multi-user.target
