@@ -27,7 +27,6 @@ def prepare_app_identity() -> None:
     QCoreApplication.setOrganizationName(ORG_NAME)
     QGuiApplication.setDesktopFileName(APP_ID)
 
-
     if sys.platform == "win32":
         _set_windows_app_user_model_id()
 
@@ -61,8 +60,6 @@ def _set_windows_app_user_model_id() -> None:
     try:
         import ctypes
 
-        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
-            WINDOWS_APP_USER_MODEL_ID
-        )
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(WINDOWS_APP_USER_MODEL_ID)
     except (AttributeError, OSError):
         pass

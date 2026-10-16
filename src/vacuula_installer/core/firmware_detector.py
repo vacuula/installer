@@ -10,22 +10,23 @@ from PySide6.QtCore import QObject, Signal
 from vacuula_installer.core.mtp import MtpDevice
 from vacuula_installer.core.robot_detector import RobotDetector
 
-VALID_GEN3_VERSIONS = [
-    ("4.5.3", "Software,4,5,3,189,0"),
-    ("4.6.0", "Software,4,6,0,72,0")
-]
+VALID_GEN3_VERSIONS = [("4.5.3", "Software,4,5,3,189,0"), ("4.6.0", "Software,4,6,0,72,0")]
 
 VALID_GEN4_VERSIONS = [
     ("1.7.0", "Firmware version: 1.7.0-2933"),
 ]
 
-#TODO Nonblocking thread, see server detector
+# TODO Nonblocking thread, see server detector
+
 
 logger = logging.getLogger(__name__)
 
+
 class FirmwareDetector(QObject):
     _done = Signal(bool, str)  # worker thread -> GUI thread
-    firmwareDetected = Signal(bool, str)  # true if valid firmware detected, false if not | str is either the version string or an error message
+    firmwareDetected = Signal(
+        bool, str
+    )  # true if valid firmware detected, false if not | str is either the version string or an error message
 
     def __init__(self, parent: QObject | None = None) -> None:
         super().__init__(parent)
@@ -44,8 +45,7 @@ class FirmwareDetector(QObject):
             self._done.emit(*self._match_gen23(gen23_version))
             return
 
-        logger.debug("Detected gen4 device, reading version.txt")
-        # gen4: 
+        # gen4:
         threading.Thread(
             target=lambda: self._done.emit(*self._detect_gen4(device)),
             daemon=True,
@@ -67,6 +67,7 @@ class FirmwareDetector(QObject):
         "Connect to MTP, read version.txt and search for valid string, return version"
         if sys.platform == "win32":
             from vacuula_installer.core.mtp.windows import WindowsMtpDevice
+
             serial_number = RobotDetector._get_serial(device)
             with WindowsMtpDevice(serial_number) as mtp:
                 mtp.open_session(1)

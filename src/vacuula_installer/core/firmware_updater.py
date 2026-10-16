@@ -20,32 +20,44 @@ from vacuula_installer.core.robot_detector import RobotDetector
 @dataclass(frozen=True)
 class FirmwareAsset:
     filename: str
-    version: str                  # display version, e.g. "4.6.0"
-    gen: str                      # "gen3" | "gen4" -- which robots this applies to
-    description_key: str          # translation key: why pick this one
-    recommended: bool = False     # shown first / highlighted in the picker
-    asset_id: str | None = None   # GitHub release asset id (private API, current)
-    url: str | None = None        # plain direct download link (future)
-    sha256: str | None = None     # expected hash; skipped if not set (fill in once known)
+    version: str  # display version, e.g. "4.6.0"
+    gen: str  # "gen3" | "gen4" -- which robots this applies to
+    description_key: str  # translation key: why pick this one
+    recommended: bool = False  # shown first / highlighted in the picker
+    asset_id: str | None = None  # GitHub release asset id (private API, current)
+    url: str | None = None  # plain direct download link (future)
+    sha256: str | None = None  # expected hash; skipped if not set (fill in once known)
 
 
 GITHUB_REPO = "vacuula/neato-firmware"
+GITHUB_TOKEN = "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"  # temp
 
 FIRMWARE_ASSETS: dict[str, FirmwareAsset] = {
     "gen4-1.7.0": FirmwareAsset(
-        "Neato_1.7.0-2933.swu", version="1.7.0", gen="gen4",
+        "Neato_1.7.0-2933.swu",
+        version="1.7.0",
+        gen="gen4",
         description_key="firmware.gen4-1.7.0.description",
-        recommended=True, asset_id="623052647", sha256="ba17120082e173f38824a43831ca8998a83f8901ebd4419ecba3786d7fae28d7",
+        recommended=True,
+        asset_id="623052647",
+        sha256="ba17120082e173f38824a43831ca8998a83f8901ebd4419ecba3786d7fae28d7",
     ),
     "gen3-4.5.3": FirmwareAsset(
-        "Neato_4.5.3_189.tgz", version="4.5.3", gen="gen3",
+        "Neato_4.5.3_189.tgz",
+        version="4.5.3",
+        gen="gen3",
         description_key="firmware.gen3-4.5.3.description",
-        recommended=True, asset_id="623054653", sha256="587018a6d51024bbd7e0e1fa01a350d80ac352352f4e7f78ff17406fbd62bbed",
+        recommended=True,
+        asset_id="623054653",
+        sha256="587018a6d51024bbd7e0e1fa01a350d80ac352352f4e7f78ff17406fbd62bbed",
     ),
     "gen3-4.6.0": FirmwareAsset(
-        "Neato_4.6.0_72.tgz", version="4.6.0", gen="gen3",
+        "Neato_4.6.0_72.tgz",
+        version="4.6.0",
+        gen="gen3",
         description_key="firmware.gen3-4.6.0.description",
-        asset_id="623054703", sha256="9d7afc202b087072b30e012a468c13bde1d414acdcb2baede08b0171573719fa",
+        asset_id="623054703",
+        sha256="9d7afc202b087072b30e012a468c13bde1d414acdcb2baede08b0171573719fa",
     ),
 }
 
@@ -59,7 +71,7 @@ def assets_for_gen(gen: str) -> list[tuple[str, FirmwareAsset]]:
 
 DOWNLOAD_TIMEOUT_S = 60.0
 CHUNK_SIZE = 64 * 1024
-RESET_NETWORK_TIMEOUT_S = 120.0 # 2 min, network reset can take a while
+RESET_NETWORK_TIMEOUT_S = 120.0  # 2 min, network reset can take a while
 POST_RESET_SETTLE_S = 1.0
 
 
@@ -87,18 +99,18 @@ def firmware_cache_dir() -> Path:
 
 
 class FirmwareUpdater(QObject):
-    downloadProgress = Signal(str, int)     # key, percent 0-100 (-1 if unknown total)
-    downloadFinished = Signal(str, str)     # key, local file path
-    downloadFailed = Signal(str, str)       # key, reason
+    downloadProgress = Signal(str, int)  # key, percent 0-100 (-1 if unknown total)
+    downloadFinished = Signal(str, str)  # key, local file path
+    downloadFailed = Signal(str, str)  # key, reason
 
-    installStepChanged = Signal(str, str)   # key, step
-    installProgress = Signal(str, int)      # key, percent 0-100 (-1 if unknown total) -- only meaningful during "sending"
-    installFailed = Signal(str, str)        # key, reason
-    installFinished = Signal(str)           # key
+    installStepChanged = Signal(str, str)  # key, step
+    installProgress = Signal(str, int)  # key, percent 0-100 (-1 if unknown total) -- only meaningful during "sending"
+    installFailed = Signal(str, str)  # key, reason
+    installFinished = Signal(str)  # key
 
-    _progress = Signal(str, int)            # worker thread -> GUI thread
-    _done = Signal(str, object)             # key, path on success | None on failure
-    _failed = Signal(str, str)              # key, reason
+    _progress = Signal(str, int)  # worker thread -> GUI thread
+    _done = Signal(str, object)  # key, path on success | None on failure
+    _failed = Signal(str, str)  # key, reason
 
     _install_step = Signal(str, str)
     _install_progress = Signal(str, int)
@@ -119,7 +131,6 @@ class FirmwareUpdater(QObject):
         self._install_done.connect(self._on_install_done)
         self._install_failed.connect(self._on_install_failed)
 
-
     def download_firmware(self, key: str) -> None:
         asset = FIRMWARE_ASSETS.get(key)
         if asset is None:
@@ -128,9 +139,7 @@ class FirmwareUpdater(QObject):
 
         stop_event = threading.Event()
         self._active_downloads[key] = stop_event
-        threading.Thread(
-            target=self._download_worker, args=(key, asset, stop_event), daemon=True
-        ).start()
+        threading.Thread(target=self._download_worker, args=(key, asset, stop_event), daemon=True).start()
 
     def cancel_download(self, key: str) -> None:
         stop_event = self._active_downloads.get(key)
@@ -147,9 +156,7 @@ class FirmwareUpdater(QObject):
             return
 
         try:
-            with httpx.stream(
-                "GET", url, headers=headers, follow_redirects=True, timeout=DOWNLOAD_TIMEOUT_S
-            ) as response:
+            with httpx.stream("GET", url, headers=headers, follow_redirects=True, timeout=DOWNLOAD_TIMEOUT_S) as response:
                 if not response.is_success:
                     self._fail_download(key, tmp_path, f"HTTP {response.status_code}")
                     return
@@ -177,7 +184,8 @@ class FirmwareUpdater(QObject):
 
             if asset.sha256 is not None and hasher.hexdigest() != asset.sha256.lower():
                 self._fail_download(
-                    key, tmp_path,
+                    key,
+                    tmp_path,
                     f"Checksum mismatch: expected {asset.sha256}, got {hasher.hexdigest()}",
                 )
                 return
@@ -241,9 +249,7 @@ class FirmwareUpdater(QObject):
             self._install_step.emit(key, "reset_network")
             cmd = reset_network_cmd(mac)
             try:
-                RobotDetector.write_cmd_port_wait_terminator(
-                    port, cmd, timeout=RESET_NETWORK_TIMEOUT_S
-                )
+                RobotDetector.write_cmd_port_wait_terminator(port, cmd, timeout=RESET_NETWORK_TIMEOUT_S)
             except TimeoutError:
                 self._install_failed.emit(key, "Timed out waiting for the robot to finish resetting its network")
                 return
@@ -363,5 +369,6 @@ def _open_mtp(device: usb.core.Device) -> MtpDevice:
     """libusb MTP on Linux/macOS, Windows' own MTP driver on Windows."""
     if sys.platform == "win32":
         from vacuula_installer.core.mtp.windows import WindowsMtpDevice
+
         return WindowsMtpDevice(RobotDetector._get_serial(device))
     return MtpDevice(device)

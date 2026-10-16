@@ -46,7 +46,7 @@ class ConnectRobotScreen(QWidget):
         self.reset_searching()
 
     # -- page builders -----------------------------------------------------
-    #TODO: Move the enttire thing up slightly
+    # TODO: Move the enttire thing up slightly
     def _build_searching_page(self) -> QWidget:
         page = QWidget(self)
         layout = QVBoxLayout(page)
@@ -99,9 +99,7 @@ class ConnectRobotScreen(QWidget):
         """Show detected robot model."""
 
         self._model_display_name = display_name
-        self._status_label.setText(
-            self._translator.tr("connect.status.detected", model=display_name)
-        )
+        self._status_label.setText(self._translator.tr("connect.status.detected", model=display_name))
         self._spinner.stop()
 
     def _retranslate(self) -> None:
@@ -110,8 +108,4 @@ class ConnectRobotScreen(QWidget):
         if self._model_id is None:
             self._status_label.setText(self._translator.tr("connect.status.waiting"))
         else:
-            self._status_label.setText(
-                self._translator.tr(
-                    "connect.status.detected", model=self._model_display_name
-                )
-            )
+            self._status_label.setText(self._translator.tr("connect.status.detected", model=self._model_display_name))

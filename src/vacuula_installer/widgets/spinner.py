@@ -50,8 +50,6 @@ class SpinnerWidget(QWidget):
         painter.setPen(pen)
 
         margin = _PEN_WIDTH
-        rect = QRectF(
-            margin, margin, self._diameter - 2 * margin, self._diameter - 2 * margin
-        )
+        rect = QRectF(margin, margin, self._diameter - 2 * margin, self._diameter - 2 * margin)
         # Was confused about spinning rate, apparently Qt angles are in 1/16th of a degree
         painter.drawArc(rect, -self._angle * 16, _ARC_SPAN_DEGREES * 16)

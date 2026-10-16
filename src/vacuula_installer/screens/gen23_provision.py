@@ -1,4 +1,5 @@
 """4-step checklist shown while the robot joins wifi and the cloud."""
+
 from __future__ import annotations
 
 from PySide6.QtCore import QMargins, Qt
@@ -128,3 +129,4 @@ class Gen23ProvisionScreen(QWidget):
             text.setText(self._translator.tr(key))
         if self._error.isVisible():
             self._error.setText(self._translator.tr("provision.gen23.failed"))
+        self._update_log_toggle_text()
