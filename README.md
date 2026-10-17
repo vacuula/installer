@@ -84,4 +84,5 @@ Translations:
 - Swedish: Rinkana, Philip
 - Dutch: Leander, "*Your royal highness* Sarcast *the 3rd, duke of Holland*"
 - Portuguese: BK 
+- Deutsch: Christian Kütbach
 

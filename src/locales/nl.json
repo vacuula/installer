@@ -129,7 +129,7 @@
   "firmware.install_failed": "Het installeren van de firmware is mislukt: {reason}",
   "firmware.try_again": "Probeer opnieuw",
   "firmware.install.step.waiting": "Wachten op de robot...",
-  "firmware.install.step.done": "Firmware-update successvol",
+  "firmware.install.step.done": "Firmware-update succesvol",
   "firmware.install.step.unknown": "Installeren...",
   "provision.failed": "Het instellen van de robot is mislukt",
   "provision.gen23.failed": "Het instellen van de robot is mislukt",
