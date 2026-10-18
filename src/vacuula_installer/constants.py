@@ -85,6 +85,7 @@ LANGUAGES: dict[str, LanguageMeta] = {
     "en": LanguageMeta(flag_svg=FLAGS_DIR / "gb.svg", native_name="English"),
     "nl": LanguageMeta(flag_svg=FLAGS_DIR / "nl.svg", native_name="Nederlands"),
     "pt": LanguageMeta(flag_svg=FLAGS_DIR / "pt.svg", native_name="Português"),
+    "fr": LanguageMeta(flag_svg=FLAGS_DIR / "fr.svg", native_name="Français"),
 }
 DEFAULT_LANGUAGE = "en" #might be replaced with system locale? I dunno how to fetch safely crossplatform
 
