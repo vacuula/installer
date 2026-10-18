@@ -138,8 +138,8 @@
 
   "provision.gen23.step1": "Connexion au Wi-Fi",
   "provision.gen23.step2": "Vérification de l'accès internet",
-  "provision.gen23.step3": "Vacuula prend les commandes",
-  "provision.gen23.step4": "Mise à l'arrêt pour un nouveau départ",
+  "provision.gen23.step3": "Vacuula prend les commandes du robot",
+  "provision.gen23.step4": "Mise à l'arrêt pour un nouveau départ...",
 
   "error.provision.gen23.wifi_password": "Le robot n'arrive pas à se connecter au réseau, vérifiez les paramètres et essayez à nouveau",
   "error.provision.gen23.no_internet": "Le robot est bien connecté au Wi-Fi mais ne parvient pas à se connecter à internet (8.8.8.8 et pool.ntp.org), vérifiez votre réseau et essayez à nouveau",
