@@ -63,7 +63,7 @@
   "wifi.title": "Connexion du robot au Wi-Fi",
   "wifi.explanation": "Vacuula a besoin de trouver votre serveur !",
   "wifi.ssid.title": "Nom du réseau Wi-Fi (SSID)",
-  "wifi.ssid.gen23.title": "Sélectionnez depuis la liste des réseaux disponibles",
+  "wifi.ssid.gen23.title": "Sélectionnez dans les réseaux disponibles",
   "wifi.pass.title": "Mot de passe (peut être vide)",
   "wifi.disclaimer": "🛈 <i>Notez que les Neatos supportés par Vacuula <b>ne prennent pas en charge</b> le  WPA3, vérifiez que votre Wi-Fi utilise WPA2 ou le mode mixte WPA2/WPA3. Les robots n'acceptent aussi que le Wi-Fi en 2.4 GHz</i>",
   "wifi.button": "Continuer",
@@ -77,7 +77,7 @@
   "wifi.gen23.scan_failed": "<i style='color:red'>Échec du scan des réseaux Wi-Fi</i>",
   "wifi.gen23.none_found": "<i style='color:yellow'>Impossible de trouver un réseau Wi-Fi</i>",
   "wifi.gen23.loading": "<i>Recherche des réseaux via le robot</i>",
-  "wifi.gen23.use_list": "Sélectionnez depuis les réseaux disponibles",
+  "wifi.gen23.use_list": "Sélection dans les réseaux disponibles",
   "wifi.gen23.use_manual": "Saisir le réseau manuellement",
   "wifi.gen23.rescan": "Rescan des réseaux",
 
