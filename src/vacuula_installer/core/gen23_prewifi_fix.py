@@ -38,6 +38,19 @@ def gen3_port_patch_files(port: int) -> dict[str, bytes]:
         "p_movw2": _arm_movw(2, port)
     }
 
+def gen3_bmu_patch_files() -> dict[str, bytes]:
+    """Byte snippets used by scripts/gen3/vacuula.sh (make_mod) to bypass battery
+    auth and mfg_access fault checks in libNeatoBMU on non-oem bq40z50 packs."""
+    return {
+        # original bytes
+        "o_bmu": b"\x6d\xff\xff\xeb",      # bl auth_check (NeatoBMU::authenticate)
+        "o_bmu_flt": b"\xb2\x21\x5b\xe1",  # ldrh r2, [fp, #-0x12] (mfg_access)
+
+        # patch bytes
+        "p_bmu": b"\x01\x00\xa0\xe3",      # mov r0, #1 (return true)
+        "p_bmu_flt": b"\x00\x20\xa0\xe3",  # mov r2, #0 (clear fault)
+    }
+
 def rc4_ksa(S, key):
     for i in range(256):
         S[i] = i
@@ -176,6 +189,7 @@ class Gen23WiFiFixer(QObject):
         # line 2: port
 
         patch_files = gen3_port_patch_files(gen3_port)
+        patch_files.update(gen3_bmu_patch_files())
         port_patch_dir = tmp_dir / "port_patch"
         port_patch_dir.mkdir(exist_ok=True)
         for name, data in patch_files.items():
