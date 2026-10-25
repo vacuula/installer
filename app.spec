@@ -104,6 +104,11 @@ def app_icon() -> str | None:
 
 icon_path = app_icon()
 
+# macOS has no system libusb: libusb-package ships one per architecture.
+if sys.platform == "darwin":
+    datas += collect_data_files("libusb_package", include_py_files=False)
+    hiddenimports += ["libusb_package"]
+
 # ---------------------------------------------------------------------------
 # Analysis: identical on every platform.
 # ---------------------------------------------------------------------------
