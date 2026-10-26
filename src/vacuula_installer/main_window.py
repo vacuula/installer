@@ -173,7 +173,7 @@ class MainWindow(QMainWindow):
         self._firmware_updater = FirmwareUpdater(self)
         self._gen23_wifi_fixer = Gen23WiFiFixer(self)
         self._ap_poller = Gen23ApPoller(self)
-        self._provisioner = Gen23Provisioner(self)
+        self._provisioner = Gen23Provisioner(self, self._session)
         self._gen4_provisioner: Gen4Provisioner | None = None
 
         self._connect_signals()
@@ -291,6 +291,7 @@ class MainWindow(QMainWindow):
 
         self._server_detector.serverDetected.connect(self._on_server_detected)
         self._server_detector.manualCheckFailed.connect(self._on_manual_check_failed)
+        self._server_detector.invalidServerVersion.connect(self._show_server_version_error)
 
         self._error_screen.restartRequested.connect(self._restart_wizard)
 
@@ -339,14 +340,21 @@ class MainWindow(QMainWindow):
             self._server_detector.check_manual
         )
 
-    def _on_server_detected(self, ip: str, cert: str, port: int, gen4_port: int, manual: bool) -> None:
+        self._server_search_screen.enterIpManuallyRequested.connect(
+            self._server_detector.stop
+        )
+
+    def _on_server_detected(self, ip: str, cert: str, port: int, gen3_port: int, gen4_port: int, manual: bool, timezone: str) -> None:
         self._session.server_ip_manual = manual
         if manual:
             self._server_search_screen.set_manual_ip_test_result(True)
-        self._goto_connect_robot_screen(ip, cert, port, gen4_port)
+        self._goto_connect_robot_screen(ip, cert, port, gen3_port, gen4_port, timezone)
 
     def _on_manual_check_failed(self, kind: str) -> None:
         self._server_search_screen.set_manual_ip_test_result(False, self._translator.tr(f"serversearch.manual.{kind}"))
+
+    def _show_server_version_error(self) -> None:
+        self._show_error("error.server.version", detailed=True)
 
     def _on_firmware_install_finished(self, key: str) -> None:
         self._firmware_update_screen.set_install_finished(key)
@@ -436,7 +444,7 @@ class MainWindow(QMainWindow):
             wifi_ssid=self._session.wifi_ssid,
             wifi_psk=self._session.wifi_pass,
             gen4_port=self._session.gen4_port or 3443,
-            vacuula_port=self._session.vacuula_port or 80,
+            vacuula_port=self._session.vacuula_port or 8050,
             manual_ip=self._session.server_ip_manual,
             parent=self,
         )
@@ -466,6 +474,11 @@ class MainWindow(QMainWindow):
 
     def _goto_finished_screen(self) -> None:
         self._robot_detector.stop()
+        if self._session.server_ip_manual:
+            url = f"{self._session.server_ip}:{self._session.vacuula_port}"
+        else:
+            url = f"vacuula.local:{self._session.vacuula_port}"
+        self._finished_screen.set_vacuula_url(url)
         self._crossfade_to(self._finished_screen)
 
     def _on_firmware(self, valid: bool, msg: str) -> None:
@@ -510,13 +523,15 @@ class MainWindow(QMainWindow):
         self._server_detector.start(NETWORK_POLLING_DELAY_MS)
         self._set_back_action(self._back_to_welcome)
 
-    def _goto_connect_robot_screen(self, ip: str, cert: str, vacuula_port: int, gen4_port: int) -> None:
+    def _goto_connect_robot_screen(self, ip: str, cert: str, vacuula_port: int, gen3_port: int, gen4_port: int, timezone: str) -> None:
         anim = self._server_search_screen.show_server_detected(ip)
         self._active_animations.append(anim)
         self._session.server_ip = ip
         self._session.server_certificate = cert
         self._session.vacuula_port = vacuula_port
+        self._session.gen3_port = gen3_port
         self._session.gen4_port = gen4_port
+        self._session.timezone = timezone
         # Dont @ me
         anim.finished.connect(
             lambda: QTimer.singleShot(

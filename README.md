@@ -6,7 +6,7 @@ Welcome to the Vacuula installer, a cross-platform application that turns your a
 
 <br />
 
-[![Latest release](https://img.shields.io/github/v/release/vacuula/installer?style=for-the-badge&label=download&color=brightgreen)](https://github.com/vacuula/installer/releases/latest) [![Discord](https://img.shields.io/badge/chat-Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/PAgwhWvyD8/)
+[![Latest release](https://img.shields.io/github/v/release/vacuula/installer?style=for-the-badge&label=download&color=brightgreen)](https://github.com/vacuula/installer/releases/latest) [![Discord](https://img.shields.io/badge/chat-Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/PAgwhWvyD8)
 
 <br clear="left" />
 
@@ -84,4 +84,6 @@ Translations:
 - Swedish: Rinkana, Philip
 - Dutch: Leander, "*Your royal highness* Sarcast *the 3rd, duke of Holland*"
 - Portuguese: BK 
+- French: Jack Warwick
+- German: Christian Kütbach
 

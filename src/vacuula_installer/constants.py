@@ -17,6 +17,11 @@ ORG_NAME = "Vacuula"
 WINDOWS_APP_USER_MODEL_ID = "Vacuula.Installer"
 
 # --------------------------------------------------------------------------
+# Vacuula defaults
+# --------------------------------------------------------------------------
+GEN3_DEFAULT_PORT = 335
+
+# --------------------------------------------------------------------------
 # Filesystem layout
 # --------------------------------------------------------------------------
 APP_ROOT: Path = Path(__file__).resolve().parent.parent
@@ -81,6 +86,7 @@ class LanguageMeta(NamedTuple):
 # ``locales/<code>.json`` catalog. 
 # Sorted by language code by program
 LANGUAGES: dict[str, LanguageMeta] = {
+    "de": LanguageMeta(flag_svg=FLAGS_DIR / "de.svg", native_name="Deutsch"),
     "sv": LanguageMeta(flag_svg=FLAGS_DIR / "se.svg", native_name="Svenska"),
     "en": LanguageMeta(flag_svg=FLAGS_DIR / "gb.svg", native_name="English"),
     "nl": LanguageMeta(flag_svg=FLAGS_DIR / "nl.svg", native_name="Nederlands"),

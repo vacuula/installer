@@ -10,9 +10,10 @@
 import sys
 from pathlib import Path
 
-from PyInstaller.utils.hooks import collect_submodules
+from PyInstaller.utils.hooks import collect_submodules, collect_data_files
 
-hiddenimports = []
+tz_datas = collect_data_files("tzdata")
+hiddenimports = collect_submodules("tzdata")
 if sys.platform == "win32":
     hiddenimports += collect_submodules("comtypes.gen")
 
@@ -30,6 +31,9 @@ BUILD_DIR = Path("build_icons")
 datas = [
     ("src/locales", "locales"),
     ("src/assets", "assets"),
+
+    # packages
+    *tz_datas
 ]
 
 # ---------------------------------------------------------------------------

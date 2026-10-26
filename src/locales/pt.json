@@ -1,5 +1,5 @@
 {
-  "String-version": "14",
+  "String-version": "15",
   "app.window_title": "Vacuula-Instalador",
   "app.version": "Instalador v{version}",
   "app.download_logs": "Download dos logs",
@@ -30,7 +30,7 @@
   "serversearch.enter_ip_manually": "Introduzir o IP manualmente",
   "serversearch.manual.placeholder": "Introduz o endereço IP",
   "serversearch.manual.try_connection": "Testar ligação",
-  "serversearch.manual.incompatible": "Não é um servidor Vacuula",
+  "serversearch.manual.not_vacuula": "Não é um servidor Vacuula",
   "serversearch.manual.not_found": "Não foi encontrado nenhum servidor neste endereço IP",
 
   "error.title": "Ocorreu um erro",
@@ -142,7 +142,7 @@
   "error.provision.lock_exit": "O script Vacuula foi terminado inesperadamente, provavelmente porque o robot não foi reiniciado antes da execução. Por favor, reinicia o robot e tenta novamente!",
 
   "finished.title": "Robot <i>mordido</i> pelo Vacuula",
-  "finished.subtitle": "Já podes desligar o cabo USB e ligar o robot! Depois espera que o robot apareça no teu <a href='http://vacuula.local'>servidor Vacuula!</a>",
+  "finished.subtitle": "Já podes desligar o cabo USB e ligar o robot! Depois espera que o robot apareça no teu <a href='http://{url}'>servidor Vacuula!</a>",
 
   "serversearch.manual.failed": "Não foi possível ligar a este endereço IP",
   "error.gen23.firmware": "Foi detetado um firmware não suportado",

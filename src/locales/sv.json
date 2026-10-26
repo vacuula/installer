@@ -154,5 +154,5 @@
   "provision.gen4.instructions": "Klar! För att ansluta till servern, håll först startknappen nertryckt tills roboten stängs av.",
 
   "finished.title": "<i>Biten</i> av Vacuula",
-  "finished.subtitle": "Du kan nu koppla loss din robotdammsugare från datorn och starta upp den! Den bör snart därefter dyka upp i din <a href='http://vacuula.local'>Vacuula server</a>!"
+  "finished.subtitle": "Du kan nu koppla loss din robotdammsugare från datorn och starta upp den! Den bör snart därefter dyka upp i din <a href='http://{url}'>Vacuula server</a>!"
 }

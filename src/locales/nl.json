@@ -1,5 +1,5 @@
 {
-  "String-version": "13",
+  "String-version": "14",
   "app.window_title": "Vacuula-ifiyer",
   "app.version": "Installatieprogramma v{version}",
   "app.download_logs": "Logboeken downloaden",
@@ -30,7 +30,7 @@
   "serversearch.enter_ip_manually": "IP-adres handmatig invoeren",
   "serversearch.manual.placeholder": "Voer IP-adres in",
   "serversearch.manual.try_connection": "Verbinding testen",
-  "serversearch.manual.incompatible": "Niet-compatibele server gevonden",
+  "serversearch.manual.not_vacuula": "Niet-compatibele server gevonden",
   "serversearch.manual.not_found": "Geen server gevonden op dit adres",
 
   "error.title": "Er is een fout opgetreden",
@@ -129,7 +129,7 @@
   "firmware.install_failed": "Het installeren van de firmware is mislukt: {reason}",
   "firmware.try_again": "Probeer opnieuw",
   "firmware.install.step.waiting": "Wachten op de robot...",
-  "firmware.install.step.done": "Firmware-update successvol",
+  "firmware.install.step.done": "Firmware-update succesvol",
   "firmware.install.step.unknown": "Installeren...",
   "provision.failed": "Het instellen van de robot is mislukt",
   "provision.gen23.failed": "Het instellen van de robot is mislukt",
@@ -155,5 +155,5 @@
   "provision.gen4.instructions": "Om verbinding te maken met de server, houd je de aan/uit-knop ingedrukt totdat je robot afsluit. Wacht een paar seconden en start de robot daarna opnieuw op.",
 
   "finished.title": "Robot <i>gebeten</i> door Vacuula",
-  "finished.subtitle": "Je kunt de robot nu loskoppelen van de computer en aanzetten! De robot verschijnt na een aantal seconden in je <a href='http://vacuula.local'>Vacuula-server!</a>"
+  "finished.subtitle": "Je kunt de robot nu loskoppelen van de computer en aanzetten! De robot verschijnt na een aantal seconden in je <a href='http://{url}'>Vacuula-server!</a>"
 }

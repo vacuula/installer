@@ -18,13 +18,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
 
     # uv provisions the interpreter (project targets 3.11 via
     # .python-version / pyproject.toml) and caches the uv cache keyed on
     # the committed lockfile.
     - name: Set up uv
-      uses: astral-sh/setup-uv@v10.1.0
+      uses: astral-sh/setup-uv@v10.3.0
       with:
         python-version: "3.11"
         enable-cache: true

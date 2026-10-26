@@ -17,6 +17,7 @@ dependencies = [
     "zeroconf>=0.151.5",
     "httpx[http2]>=0.28.1",
     "comtypes>=1.4.17",
+    "tzdata>=2026.5",
 ]
 
 [project.scripts]

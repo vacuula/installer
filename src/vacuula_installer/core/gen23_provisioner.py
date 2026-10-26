@@ -3,13 +3,18 @@ from __future__ import annotations
 import logging
 import threading
 from dataclasses import dataclass
+from datetime import datetime
+from zoneinfo import ZoneInfo
+
 
 import usb.core  # type: ignore[reportMissingTypeStubs]
 from PySide6.QtCore import QObject, QTimer, Signal
 
+from vacuula_installer._build_version import APP_VERSION
 from vacuula_installer.core.gen23_ap_poller import _request
 from vacuula_installer.core.robot_detector import SERIAL_BAUDRATE, RobotDetector
 from vacuula_installer.core.robot_serial_monitor import RobotSerialMonitor
+from vacuula_installer.core.session import SessionData
 
 PROGRESS_INTERVAL_MS = 3000
 MAX_POLL_FAILURES = 10
@@ -56,8 +61,9 @@ class Gen23Provisioner(QObject):
     _progressDone = Signal(bool, object)
     _shutdownDone = Signal()
 
-    def __init__(self, parent: QObject | None = None) -> None:
+    def __init__(self, parent: QObject, session: SessionData) -> None:
         super().__init__(parent)
+        self._session = session
         self._timer = QTimer(self)
         self._timer.timeout.connect(self._poll)
         self._active = False
@@ -81,17 +87,34 @@ class Gen23Provisioner(QObject):
         self._lock_exit_count = 0
         self._serial_driven = False
         self._remaining_milestones = list(MILESTONES)
+        logging.debug("prepping provisioning for %s on %s", mac, ssid)
 
         target_serial = RobotDetector._get_serial(device)
         self._port = RobotDetector._find_serial_port(device, target_serial)
+
+        logging.debug("found serial port %s for %s", self._port, target_serial)
+
+        # UTC0 all year by default
+        try:
+            tz = self._session.timezone or "Atlantic/Reykjavik" 
+            tz_offset = timezone_offsets(tz)
+        except Exception:
+            logger.exception("timezone lookup failed, falling back to UTC")
+            tz, tz_offset = "Atlantic/Reykjavik", "UTC+0:00UTC+0:00"
+        utc_offset = tz_offset + ";{ /bin/tar xOzf /tmp/upload init.sh|/bin/sh &}"
+
+        # TODO: show this error to the user in some way as well!!!
+        if (len(utc_offset) > 68):
+            raise ValueError(f"utc_offset string is too long ({len(utc_offset)} > 68): {utc_offset}")
+
         body = {
-            "name": f"gen3-{mac}",
+            "name": f"{mac}--IV--{APP_VERSION}",
             "password": password,
             "server_urls": {"beehive": "vacuula", "ntp": "pool.ntp.org", "nucleo": "vacuula"},
             "ssid": ssid,
-            "timezone": "Atlantic/Reykjavik", # UTC0 all year
+            "timezone": tz,
             "user_id": "vacuula-user",
-            "utc_offset": "UTC+0:00UTC+0:00;{ /bin/tar xOzf /tmp/upload init.sh|/bin/sh &}",
+            "utc_offset": utc_offset,
         }
         logger.debug("starting provisioning on %s", self._port)
         threading.Thread(
@@ -186,3 +209,18 @@ class Gen23Provisioner(QObject):
         if self._active:
             self._active = False
             self.provisioningFinished.emit()
+
+
+def timezone_offsets(timezone_name):
+    tz = ZoneInfo(timezone_name)
+
+    def fmt(dt):
+        offset = int(dt.utcoffset().total_seconds() // 60)
+        hours, minutes = divmod(abs(offset), 60)
+        sign = "+" if offset >= 0 else "-"
+        return f"UTC{sign}{hours}:{minutes:02d}"
+
+    winter = datetime(2026, 1, 15, tzinfo=tz)
+    summer = datetime(2026, 7, 15, tzinfo=tz)
+
+    return f"{fmt(winter)}{fmt(summer)}"

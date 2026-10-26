@@ -124,7 +124,7 @@ class Gen4Provisioner(QObject):
             cacerts = config/ssl/vacuula.crt
             ntp = pool.ntp.org
             check_host = {self.vacuula_server}
-            check_port = {self.vacuula_port}
+            check_port = {self.gen4_port}
             check_timeout = 10
             """).encode('utf-8')
         mtp.send_file('/home/root/tron/config/vendors.ini', storage_id, new_config)
@@ -169,6 +169,8 @@ class Gen4Provisioner(QObject):
             {vacuula_block}
             """).encode('utf-8')
         mtp.send_file('/etc/hosts', storage_id, hosts_config)
+
+        mtp.send_file('/user/tron/vacuula.ini', storage_id, self.vacuula_server_ip.encode('utf-8'))
 
 
     def _on_step(self, step: int) -> None:

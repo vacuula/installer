@@ -32,8 +32,8 @@ class LinkButtonSpec:
 
 
 LINK_BUTTONS: tuple[LinkButtonSpec, ...] = (
-    LinkButtonSpec(GITHUB_SVG, "Discord", "https://discord.gg/PAgwhWvyD8"),
-    LinkButtonSpec(DISCORD_SVG, "Github", "https://github.com/vacuula/vacuula"),
+    LinkButtonSpec(GITHUB_SVG, "GitHub", "https://github.com/vacuula/vacuula"),
+    LinkButtonSpec(DISCORD_SVG, "Discord", "https://discord.gg/PAgwhWvyD8"),
     LinkButtonSpec(BUYMEACOFFEE_SVG, "Buy Me a Coffee", "https://www.buymeacoffee.com/philip2809"),
     LinkButtonSpec(KOFI_SVG, "Ko-Fi", "https://ko-fi.com/V7V61PBIY6"),
 )
@@ -75,6 +75,7 @@ class FinishedScreen(QWidget):
     def __init__(self, translator: Translator, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self._translator = translator
+        self._vacuula_url = "vacuula.local"
         self._link_buttons: list[CircleLinkButton] = []
 
         outer = QVBoxLayout(self)
@@ -120,8 +121,12 @@ class FinishedScreen(QWidget):
             row.addWidget(button)
         return row
 
+    def set_vacuula_url(self, url: str) -> None:
+        self._vacuula_url = url
+        self.finished_subtitle.setText(self._translator.tr("finished.subtitle", url=self._vacuula_url))
+
     def _retranslate(self) -> None:
         self._finished_title.setText(self._translator.tr("finished.title"))
-        self.finished_subtitle.setText(self._translator.tr("finished.subtitle"))
+        self.finished_subtitle.setText(self._translator.tr("finished.subtitle", url=self._vacuula_url))
         for button in self._link_buttons:
             button._retranslate()

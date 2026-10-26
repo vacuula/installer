@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import sys
+import threading
 
 from PySide6.QtWidgets import QApplication
 
@@ -19,6 +20,8 @@ prepare_app_identity()
 setup_logging()
 logger = logging.getLogger(__name__)
 
+sys.excepthook = lambda t, e, tb: logger.critical("Uncaught exception", exc_info=(t, e, tb))
+threading.excepthook = lambda a: logger.critical("Uncaught exception in thread", exc_info=(a.exc_type, a.exc_value, a.exc_traceback))
 
 def main() -> int:
     logger.info("Starting Vacuula Installer v%s", APP_VERSION)

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from os import mkdir
 import tarfile
 import tempfile
 import threading
@@ -9,11 +10,33 @@ from pathlib import Path
 import usb.core  # type: ignore[reportMissingTypeStubs]
 from PySide6.QtCore import QObject, Signal
 
-from vacuula_installer.constants import SCRIPTS_DIR
+from vacuula_installer.constants import GEN3_DEFAULT_PORT, SCRIPTS_DIR
 from vacuula_installer.core.neato_blast import upload_file
 from vacuula_installer.core.robot_detector import RobotDetector
 from vacuula_installer.core.session import SessionData
 
+def _arm_movw(rd: int, value: int) -> bytes:
+    """ARM (A1) 'MOVW Rd, #imm16' little-endian: imm12[7:0], Rd|imm12[11:8], imm4, 0xE3"""
+    return bytes([value & 0xFF, (rd << 4) | ((value >> 8) & 0xF), (value >> 12) & 0xF, 0xE3])
+
+def gen3_port_patch_files(port: int) -> dict[str, bytes]:
+    """Byte snippets used by scripts/gen3/vacuula.sh (make_mod) to move Gen3 from 443 to `port`.
+    p_* = new bytes, o_* = original bytes expected before patching. Empty for the default port."""
+    if port == 443:
+        return {}
+    if not 100 <= port <= 999:
+        raise ValueError(f"invalid gen3 port {port}")
+    return {
+        # original bytes
+        "o_str": b"\0\0\0" + f"{443}\0".encode(),  # 3 null bytes + "443\0"
+        "o_movw1": _arm_movw(1, 443),
+        "o_movw2": _arm_movw(2, 443),
+
+        # patch bytes
+        "p_str": b"\0\0\0" + f"{port}\0".encode(), # same as original 3 null + "port\0"
+        "p_movw1": _arm_movw(1, port),
+        "p_movw2": _arm_movw(2, port)
+    }
 
 def rc4_ksa(S, key):
     for i in range(256):
@@ -145,13 +168,18 @@ class Gen23WiFiFixer(QObject):
         cert_path.write_bytes(session.server_certificate.encode())
 
         # additional info
-        # NOTE: read about nip usage in the FAQ
         ip = session.server_ip
-        nip = f"vacuula-local-{session.server_ip.replace('.', '-')}.nip.io"
+        gen3_port = session.gen3_port or GEN3_DEFAULT_PORT
         config_path = tmp_dir / "config"
-        config_path.write_bytes(f"{ip}\n{nip}\n".encode())
+        config_path.write_bytes(f"{ip}\n{gen3_port}\n".encode())
         # line 1: ip
-        # line 2: nip
+        # line 2: port
+
+        patch_files = gen3_port_patch_files(gen3_port)
+        port_patch_dir = tmp_dir / "port_patch"
+        port_patch_dir.mkdir(exist_ok=True)
+        for name, data in patch_files.items():
+            (port_patch_dir / name).write_bytes(data)
 
         # make tarball
         with tarfile.open(tarball, "w:gz") as tar:
@@ -159,6 +187,7 @@ class Gen23WiFiFixer(QObject):
                 tar.add(p, arcname=p.name)
             tar.add(cert_path, arcname="cert.pem")
             tar.add(config_path, arcname="config")
+            tar.add(port_patch_dir, arcname="port_patch")
 
         return tarball
 

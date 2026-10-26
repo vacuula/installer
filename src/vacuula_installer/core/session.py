@@ -15,8 +15,9 @@ class SessionData:
     server_certificate: str | None = None
 
     # TODO: clean this up later as well, not really the cleanesy way rn
-    # gen3 cannot have port modified, explained in vacuula repo
+    timezone : str | None = None
     vacuula_port: int | None = None
+    gen3_port: int | None = None
     gen4_port: int | None = None
 
     robot_serial_nbr: str | None = None

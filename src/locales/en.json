@@ -1,5 +1,5 @@
 {
-  "String-version": "14",
+  "String-version": "16",
   "app.window_title": "Vacuula-ifiyer",
   "app.version": "Installer v{version}",
   "app.download_logs": "Download logs",
@@ -30,7 +30,7 @@
   "serversearch.enter_ip_manually": "Enter IP manually",
   "serversearch.manual.placeholder": "Enter IP address",
   "serversearch.manual.try_connection": "Try connection",
-  "serversearch.manual.incompatible": "Not a Vacuula server",
+  "serversearch.manual.not_vacuula": "Not a Vacuula server",
   "serversearch.manual.not_found": "No server found at this address",
 
   "error.title": "An error occurred",
@@ -47,6 +47,8 @@
   "error.gen4.unreadable": "Unable to read firmware version",
   "error.gen23.reset": "Network reset failed",
   "error.generic.unexpected": "An unexpected error occurred",
+  "error.server.version": "Incompatible server and installer versions",
+  "error.server.version.detailed": "Please update your Vacuula server and Vacuula installer to the latest versions, you can find the latest releases on GitHub!",
   "error.generic.help": "🛈 <i> Make sure the robot is powered on and connected to your computer via USB. If the problem persists, try restarting the installer and the robot. If it refuses to work, ask for help in the Discord!</i>",
   "error.firmware.help": "🛈 <i> Follow the guide on <a href='https://github.com/vacuula/installer'>GitHub</a> on how to update your robot to a supported firmware version or ask for help in the Discord. </i>",
 
@@ -154,5 +156,5 @@
   "provision.gen4.instructions": "To connect to the server, hold down the power button until your robot turns off and wait a few seconds. Then restart the robot and wait until it has fully started.",
 
   "finished.title": "Robot <i>bitten</i> by Vacuula",
-  "finished.subtitle": "You may now disconnect the robot from your computer and turn the robot on! Then please wait for the robot to show up in your <a href='http://vacuula.local'>Vacuula server!</a>"
+  "finished.subtitle": "You may now disconnect the robot from your computer and turn the robot on! Then please wait for the robot to show up in your <a href='http://{url}'>Vacuula server!</a>"
 }

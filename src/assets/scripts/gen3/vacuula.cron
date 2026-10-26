@@ -1,0 +1,1 @@
+0,3,6,9,12,15,18,21,24,27,30,33,36,39,42,45,48,51,54,57 * * * * export PATH=:/proc/boot:/sbin:/bin:/usr/sbin:/usr/bin:/etc; export LD_LIBRARY_PATH=:/tmp:/proc/boot:/lib:/usr/lib:/lib/dll; /emmc/vacuula/vacuula.sh watchdog
