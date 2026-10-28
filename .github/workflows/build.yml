@@ -97,7 +97,7 @@ jobs:
 
       # Use uv for deps and cache lock file
       - name: Set up uv
-        uses: astral-sh/setup-uv@v10.3.0
+        uses: astral-sh/setup-uv@v10.3.2
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           enable-cache: true
