@@ -24,7 +24,7 @@ jobs:
     # .python-version / pyproject.toml) and caches the uv cache keyed on
     # the committed lockfile.
     - name: Set up uv
-      uses: astral-sh/setup-uv@v10.3.0
+      uses: astral-sh/setup-uv@v10.3.2
       with:
         python-version: "3.11"
         enable-cache: true
