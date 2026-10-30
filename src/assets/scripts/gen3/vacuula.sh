@@ -95,6 +95,8 @@ watchdog () {
         modded_pid=$!
         log "Started modded astro with PID ${modded_pid}"
     fi
+
+    ln -fsP ${MODDED_ASTRO} ${ASTRO}
 }
 
 # check_bytes <file> <offset> <expected-bytes-file>. true if file has those bytes at offset
