@@ -13,6 +13,10 @@ ASTRO=/usr/bin/astro
 UPLOADER=/usr/lib/libNeatoUploader.so.1
 MODDED_UPLOADER=${FOLDER}/libNeatoUploader.so.1
 TMP_UPLOADER=/tmp/libNeatoUploader.so.1
+
+BMU=/usr/lib/libNeatoBMU.so
+MODDED_BMU=${FOLDER}/libNeatoBMU.so
+TMP_BMU=/tmp/libNeatoBMU.so
 PORT_PATCH_DIR=/emmc/vacuula/port_patch
 GEN3_PORT="$(sed -n '2p' /emmc/vacuula/config)"
 
@@ -55,6 +59,10 @@ case "${NEATO_VERSION}" in
         MOVW_R2_OFFSET=173600                   # 0x2A620: movw r2,#443 (checkNucleo)
         MOVW_R1_OFFSET=177712                   # 0x2B630: movw r1,#443 (checkNucleo)
         LIB_MOVW_OFFSETS="21984 23016"          # 0x55E0 0x59E8: movw r2,#443 in libNeatoUploader
+        BMU_AUTH_OFFSET=15064                   # 0x3AD8: bl auth_check in NeatoBMU::authenticate()
+        BMU_MFG_OFFSETS="9232 9728"             # 0x2410 0x2600: zero mfg_access (+0x54) in read_bmu / read_data_block1
+        BMU_SRW_OFFSET1=7348                    # 0x1CB4: retry counter init in smbus_read_word
+        BMU_SRW_OFFSET2=7412                    # 0x1CF4: retry loop tail in smbus_read_word
         ;;
     4.6.0-72)
         # Replace nucleo path (446440 == 0x6CFE8)
@@ -73,6 +81,38 @@ case "${NEATO_VERSION}" in
         log "Neato version ${NEATO_VERSION} is not supported, exiting"
         exit 1
 esac
+
+start_bmu () {
+    if [ -f ${MODDED_BMU} ]; then
+        # PowerDaemon starts in start_app.sh before start_mod runs, so on boot it
+        # loads the original unpatched library from /usr/lib. We copy the patched
+        # library to /tmp and restart it once per boot (marker), so a watchdog tick
+        # never restarts a running PowerDaemon. If it dies later we do restart it,
+        # as it will then load the patched library anyway.
+        if [ ! -f ${TMP_BMU} ]; then
+            cp ${MODDED_BMU} ${TMP_BMU} || true
+            log "Copied patched NeatoBMU to ${TMP_BMU}"
+        fi
+
+        pd_pid=$(pidin -f aN | awk '$NF ~ /PowerDaemon$/ { print $1 }') || true
+        if [ -n "$pd_pid" ] && [ ! -f /tmp/.vacuula_bmu_done ]; then
+            log "Unpatched PowerDaemon is running with PID ${pd_pid}, killing it"
+            slay ${pd_pid} || true
+            sleep 1
+            pd_pid=""
+        fi
+        if [ -z "$pd_pid" ]; then
+            log "PowerDaemon is not running, starting it"
+            # We clear these sticky flags as the orginal libary might have flagged
+            # the battery before load or pre-vaccula install, refer to the patch comments.
+            qdbc -d /dev/qdb/systemdb "INSERT OR REPLACE INTO IntegerSettings( Name, Value ) VALUES ( 'BATTPERMERROR', 0 );" || true
+            qdbc -d /dev/qdb/systemdb "INSERT OR REPLACE INTO IntegerSettings( Name, Value ) VALUES ( 'DEEPDISCHARGE', 0 );" || true
+            nice -n-2 PowerDaemon > /dev/null 2>&1 &
+            log "Started patched PowerDaemon with PID $!"
+            touch /tmp/.vacuula_bmu_done || true
+        fi
+    fi
+}
 
 watchdog () {
     original_pid=$(pidin -f aN | awk '$NF ~ /astro$/ { print $1 }')
@@ -95,6 +135,8 @@ watchdog () {
         modded_pid=$!
         log "Started modded astro with PID ${modded_pid}"
     fi
+
+    start_bmu
 }
 
 # check_bytes <file> <offset> <expected-bytes-file>. true if file has those bytes at offset
@@ -110,7 +152,7 @@ patch_at () {
 }
 
 patch_fail () {
-    log "[[vacuula-installer-failed]] gen3 port patch: $1"
+    log "[[vacuula-installer-failed]] patches failed: $1"
     echo "[[vacuula-installer-failed]]" > /dev/serusb1
     exit 1
 }
@@ -153,6 +195,58 @@ patch_port () {
     rm -f /tmp/vacuula_chk
 }
 
+# Patch libNeatoBMU so non-oem battery packs can authenticate and charge:
+# 1. authenticate(): sends an SMBus challenge and verifies an HMAC-SHA1 response
+#    keyed with a secret only genuine Neato BMS firmware has ('bl' -> 'mov r0, #1').
+#    we simply always retun success effectively patching the check out.
+# 2. read_bmu() / read_data_block1(): reads SMBus reg 0x00 (ManufacturerAccess) into
+#    mfg_access for checkFault/checkPermError. Framed as a fault check (0x0000 when
+#    healthy on Neato BMS firmware, bits in 0x00F2 on fault), it also catches clones:
+#    standard TI bq40z50 firmware returns status word 0x0387, which overlaps 0x00F2 and
+#    sets BATTPERMERROR=1 in systemdb causing the robot to report a "fault" and never 
+#    trust the battery no matter its actual health. ('ldrh r2, [fp, #-0x12]' -> 'mov r2, #0')
+#    we again simply always return success effectively patching the check out.
+# 3. read_smbus_word(): as some clones of the bz40z50 bms sometimes will randomly respond with
+#    NAK we patch read_smbus_word to make use of i2c_read_robust instad of one-shot i2c_read
+patch_bmu () {
+    if [ -z "${BMU_AUTH_OFFSET:-}" ]; then
+        log "No BMU patch for ${NEATO_VERSION}, skipping"
+        return 0
+    fi
+
+    log "Patching NeatoBMU"
+    cp ${BMU} ${MODDED_BMU}
+
+    check_bytes ${MODDED_BMU} ${BMU_AUTH_OFFSET} ${PORT_PATCH_DIR}/o_bmu || patch_fail "bmu auth"
+    for o in ${BMU_MFG_OFFSETS}; do
+        check_bytes ${MODDED_BMU} $o ${PORT_PATCH_DIR}/o_bmu_flt || patch_fail "bmu mfg $o"
+    done
+    if [ -n "${BMU_SRW_OFFSET1:-}" ]; then
+        check_bytes ${MODDED_BMU} ${BMU_SRW_OFFSET1} ${PORT_PATCH_DIR}/o_bmu_srw1 || patch_fail "bmu srw1"
+        check_bytes ${MODDED_BMU} ${BMU_SRW_OFFSET2} ${PORT_PATCH_DIR}/o_bmu_srw2 || patch_fail "bmu srw2"
+    fi
+
+    patch_at ${PORT_PATCH_DIR}/p_bmu ${MODDED_BMU} ${BMU_AUTH_OFFSET}
+    for o in ${BMU_MFG_OFFSETS}; do
+        patch_at ${PORT_PATCH_DIR}/p_bmu_flt ${MODDED_BMU} $o
+    done
+    if [ -n "${BMU_SRW_OFFSET1:-}" ]; then
+        patch_at ${PORT_PATCH_DIR}/p_bmu_srw1 ${MODDED_BMU} ${BMU_SRW_OFFSET1}
+        patch_at ${PORT_PATCH_DIR}/p_bmu_srw2 ${MODDED_BMU} ${BMU_SRW_OFFSET2}
+    fi
+
+    check_bytes ${MODDED_BMU} ${BMU_AUTH_OFFSET} ${PORT_PATCH_DIR}/p_bmu || patch_fail "bmu verify"
+    for o in ${BMU_MFG_OFFSETS}; do
+        check_bytes ${MODDED_BMU} $o ${PORT_PATCH_DIR}/p_bmu_flt || patch_fail "bmu verify $o"
+    done
+    if [ -n "${BMU_SRW_OFFSET1:-}" ]; then
+        check_bytes ${MODDED_BMU} ${BMU_SRW_OFFSET1} ${PORT_PATCH_DIR}/p_bmu_srw1 || patch_fail "bmu srw1 verify"
+        check_bytes ${MODDED_BMU} ${BMU_SRW_OFFSET2} ${PORT_PATCH_DIR}/p_bmu_srw2 || patch_fail "bmu srw2 verify"
+    fi
+    log "BMU patch done: $(openssl sha1 ${MODDED_BMU})"
+    rm -f /tmp/vacuula_chk
+}
+
 make_mod () {
     log "Making modded astro binary at ${MODDED_ASTRO}"
     log "Copying original astro from ${ASTRO}"
@@ -184,6 +278,9 @@ make_mod () {
     # gen3 port: patch astro_mod (and a copy of libNeatoUploader) when GEN3_PORT is not 443
     patch_port
 
+    # non-oem batteries patch
+    patch_bmu
+
     # TODO: verification of all mods!
 
     log "Modded astro binary created successfully"
@@ -207,6 +304,7 @@ start_mod () {
     # initially, our cron has to run!
     crontab -r || true
     crontab /emmc/vacuula/vacuula.cron || true
+    start_bmu
 }
 
 
