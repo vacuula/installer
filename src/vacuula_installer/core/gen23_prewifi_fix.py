@@ -153,10 +153,9 @@ class Gen23WiFiFixer(QObject):
         with tempfile.TemporaryDirectory() as tmp:  # deleted when the block exits
             tarball = self._generate_tarball(Path(tmp), session)
             try:
-                upload_file(port, str(tarball), "Tarball", noburn=True)
+                return upload_file(port, str(tarball), "Tarball", noburn=True)
             except Exception:  # noqa: BLE001
                 return False
-        return True
 
     def _generate_tarball(self, tmp_dir: Path, session: SessionData) -> Path:
         tarball = tmp_dir / "vacuula.tar.gz"
