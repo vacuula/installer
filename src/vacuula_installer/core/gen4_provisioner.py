@@ -8,7 +8,7 @@ import usb.core  # type: ignore[reportMissingTypeStubs]
 from PySide6.QtCore import QObject, Signal
 
 from vacuula_installer.constants import SCRIPTS_DIR
-from vacuula_installer.core.mtp import MtpDevice
+from vacuula_installer.core.mtp import MtpDevice, usb_mtp_device
 from vacuula_installer.core.robot_detector import RobotDetector
 
 VENDOR_ID = 0x1D6B
@@ -91,7 +91,7 @@ class Gen4Provisioner(QObject):
             storage_id = mtp.get_storage_ids()[0]
         else:
             try:
-                mtp = MtpDevice(dev)
+                mtp = usb_mtp_device(dev)
                 mtp.open_session(1)
                 storage_id = mtp.get_storage_ids()[0]
             except Exception:  # noqa: BLE001
