@@ -48,7 +48,7 @@
   "error.gen23.reset": "Network reset failed",
   "error.generic.unexpected": "An unexpected error occurred",
   "error.server.version": "Incompatible server and installer versions",
-  "error.server.version.detailed": "Please update your Vacuula server and Vacuula installer to the latest versions, you can find the latest releases on GitHub!",
+  "error.server.version.detailed": "Please update your Vacuula server and Vacuula installer to the latest versions!",
   "error.generic.help": "🛈 <i> Make sure the robot is powered on and connected to your computer via USB. If the problem persists, try restarting the installer and the robot. If it refuses to work, ask for help in the Discord!</i>",
   "error.firmware.help": "🛈 <i> Follow the guide on <a href='https://github.com/vacuula/installer'>GitHub</a> on how to update your robot to a supported firmware version or ask for help in the Discord. </i>",
 

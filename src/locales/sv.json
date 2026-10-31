@@ -1,5 +1,5 @@
 {
-  "String-version": "14",
+  "String-version": "16",
   "app.window_title": "Vacuula-ifierare",
   "app.version": "Programversion v{version}",
   "app.download_logs": "Spara loggarna",
@@ -30,7 +30,7 @@
   "serversearch.enter_ip_manually": "Ange IP-adress manuellt",
   "serversearch.manual.placeholder": "Ange IP-adress",
   "serversearch.manual.try_connection": "Prova anslutning",
-  "serversearch.manual.incompatible": "Ej en Vacuula-server",
+  "serversearch.manual.not_vacuula": "Ej en Vacuula-server",
   "serversearch.manual.not_found": "Ingen server hittades på denna adress",
 
   "error.title": "Ett fel har inträffat",
@@ -47,6 +47,8 @@
   "error.gen4.unreadable": "Kan inte läsa den fasta programvarans version",
   "error.gen23.reset": "Lyckades inte återställa robotens nätverk",
   "error.generic.unexpected": "Ett oväntat fel har inträffat",
+  "error.server.version": "Servern och installationsprogrammet har inkompatibla versioner",
+  "error.server.version.detailed": "Vänligen se till att både servern och installationsprogrammet är den senaste versionen",
   "error.generic.help": "🛈 <i> Se till att robotdammsugaren är påslagen och ansluten till datorn med USB-kabel. Om problemet kvarstår, prova starta om både installationsprogrammet och roboten. Om det fortfarande vägrar fungera, fråga i Discord:en!</i>",
   "error.firmware.help": "🛈 <i> Följ instruktionerna i <a href='https://github.com/vacuula/installer'>Github</a> om hur man uppdaterar din dammsugare till en version av den fasta programvaran som stöds, eller be om hjälp i Discord:en.</i>",
 
