@@ -48,6 +48,34 @@ echo "traceroute done" >> /tmp/vacuula-logs/vacuula.log
 /bin/tar -czf /tmp/vacuula-logs/vacuula.logs -C /tmp/vacuula-logs .
 rm -f /tmp/vacuula-logs/*.log
 
+
+# cleanup old files
+systemctl stop tron
+
+
+python3 -c "
+import sqlite3
+c = sqlite3.connect('/user/databases/mapsdb')
+for t in ('FloorMaps', 'TrackMaps', 'SmartCharging'):
+    print('BEFORE', t)
+    for r in c.execute('SELECT * FROM ' + t):
+        print('  ', r)
+" >> /tmp/vacuula-logs/vacuula.log
+
+python3 -c "
+import sqlite3
+c = sqlite3.connect('/user/databases/mapsdb')
+for t in ('FloorMaps', 'TrackMaps', 'SmartCharging'):
+    n = c.execute('DELETE FROM ' + t).rowcount
+    print(t, 'deleted', n)
+c.commit()
+c.execute('VACUUM')
+c.close()
+" >> /tmp/vacuula-logs/vacuula.log
+
+systemctl start tron
+
+
 # change to cyan to signal "vacuula logs done!"
 /usr/local/bin/roboctrl -l a:1:t:0:g:255:255:1000:0:0+b:255:255:1000:0:0
 
