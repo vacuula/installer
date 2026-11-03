@@ -59,6 +59,7 @@ We offer no guarantee, __you try to revive your robot on your own risk__ - we ar
 
 - Robot not detected on Linux and you have a gen3 device? You need to add yourself to the group dialout `sudo usermod -aG dialout <username>` and reboot your computer
 - READ THE DISCLAIMER, it has important information!
+- Server IP changed? Gen4 robots find the server by name (`vacuula.local`) unless you entered the IP by hand during install. Gen3 robots keep the IP from the install, so they need the old address back or a new run of the installer. Reserving the server's address in your router's DHCP settings avoids the problem.
 - Yes *bitten* is used as a synonym to *installed* (or hacked/freed)
 
 ## I want to help with the development! (yes there are things to improve)
