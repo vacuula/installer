@@ -10,7 +10,7 @@ Welcome to the Vacuula installer, a cross-platform application that turns your a
 
 <br clear="left" />
 
-The installer supports all generation 3 and 4 Neato robots (D3 → D10), and should work on Linux distros, Windows (7+) and *__partly__* on mac\* (\*gen3 robots work, gen4 do not). *Botvac Connected is currently not supported.*
+The installer supports all generation 3 and 4 Neato robots (D3 → D10), and should work on Linux distros, Windows (7+) and on macOS (Intel and Apple silicon, see [gen4 on macOS](#gen4-d8-d10-on-macos)). *Botvac Connected is currently not supported.*
 
 <details><summary>Don't have a Neato robot vacuum, but stumbled here from somewhere?</summary>
   
@@ -87,3 +87,27 @@ Translations:
 - French: Jack Warwick
 - German: Christian Kütbach
 
+## Gen4 (D8-D10) on macOS
+
+macOS's own camera service (`ptpcamerad`) claims every PTP/MTP USB device as soon as it is
+plugged in, so nothing else can talk to the robot. On macOS the installer therefore:
+
+1. stops `ptpcamerad` right before connecting (it is a per-user service that macOS restarts on
+   its own, so this is harmless), and retries briefly while it lets go of the robot;
+2. skips the USB reset other platforms use, because on macOS a reset re-enumerates the robot and
+   hands it straight back to `ptpcamerad`;
+3. uses the libusb bundled by `libusb-package` (macOS has no system libusb), with builds for both
+   Intel and Apple silicon.
+
+The installed `umtprd.conf` now uses `loop_on_disconnect 1`. With `0`, the robot's MTP service
+stops answering after the first host disconnect (which always happens on macOS because of the
+above) until the robot is rebooted.
+
+Tips if the robot isn't found:
+
+- Close Image Capture and Photos before connecting; they keep `ptpcamerad` busy.
+- Use a USB **data** cable directly on the Mac (not through a hub) and wait until the robot has
+  fully started before plugging it in.
+- If it still fails, unplug the robot, restart it, and plug it back in.
+
+Tested with a D8 on firmware 1.7.0 on macOS 15 (Apple silicon).
