@@ -204,6 +204,7 @@ start_mod () {
     # [ -f /emmc/vacuula/shell.sh ] && /bin/sh /emmc/vacuula/shell.sh &
 
     ln -fsP /emmc/vacuula/hosts /etc/hosts
+    ln -fsP /emmc/vacuula/tools.sh /etc/copyDumps.sh
     # ifconfig lo0 alias 8.8.8.8 netmask 255.255.255.255
 
     # initially, our cron has to run!
