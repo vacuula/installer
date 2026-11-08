@@ -86,4 +86,3 @@ Translations:
 - Portuguese: BK 
 - French: Jack Warwick
 - German: Christian Kütbach
-
