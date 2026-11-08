@@ -18,6 +18,7 @@ dependencies = [
     "httpx[http2]>=0.28.1",
     "comtypes>=1.4.17",
     "tzdata>=2026.5",
+    "libusb-package>=1.0.26; sys_platform == 'darwin'",
 ]
 
 [project.scripts]

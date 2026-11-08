@@ -12,7 +12,7 @@ import usb.core  # type: ignore[reportMissingTypeStubs]
 from PySide6.QtCore import QObject, Signal
 
 from vacuula_installer.core.gen23_prewifi_fix import reset_network_cmd
-from vacuula_installer.core.mtp import MtpDevice
+from vacuula_installer.core.mtp import MtpDevice, usb_mtp_device
 from vacuula_installer.core.neato_blast import upload_file
 from vacuula_installer.core.robot_detector import RobotDetector
 

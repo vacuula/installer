@@ -7,7 +7,7 @@ import threading
 import usb.core  # type: ignore[reportMissingTypeStubs]
 from PySide6.QtCore import QObject, Signal
 
-from vacuula_installer.core.mtp import MtpDevice
+from vacuula_installer.core.mtp import usb_mtp_device
 from vacuula_installer.core.robot_detector import RobotDetector
 
 VALID_GEN3_VERSIONS = [
@@ -74,7 +74,7 @@ class FirmwareDetector(QObject):
                 raw_version_data = mtp.read_file(storage_id, ["version.txt"])
         else:
             try:
-                mtp = MtpDevice(device)
+                mtp = usb_mtp_device(device)
                 mtp.open_session(1)
                 # TODO: 1.0.3! fix to read from all storages, good enough for now, verified with umtp source code
                 storage_id = mtp.get_storage_ids()[0]
