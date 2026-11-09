@@ -1,14 +1,16 @@
 name: Build Desktop App
 
 # Trigger via commit message:
-#   build:2.3.1-b   -> build + push image tagged 2.3.1-b
-#   build:1.0.0     -> build + push image tagged 1.0.0 AND latest
-#   release:1.0.0    -> same as build, plus a GitHub Release with files attached
-# When using release, making a beta (-b or similar) it will make a prerelease, if no beta marker, it will make a draft release to be published.
+#   build:2.3.1-b1              -> build installers versioned 2.3.1-b1
+#   build:2.3.1-b1+test-thing   -> build installers for a custom/test build
+#   build:1.0.0                 -> build installers versioned 1.0.0
+#   release:1.0.0               -> same as build, plus a GitHub Release with files attached
+# When using release, a beta or custom build (-bX / +...) makes a prerelease,
+# a plain X.X.X makes a draft release to be published.
 
 on:
   push:
-    branches: [main]
+    branches: [main, 'custom/**']
   workflow_dispatch:
 
 env:
@@ -32,23 +34,23 @@ jobs:
           version=""
           release=false
 
-          if [[ "$COMMIT_MSG" =~ release:([0-9A-Za-z._-]+) ]]; then
+          if [[ "$COMMIT_MSG" =~ release:([0-9A-Za-z._+-]+) ]]; then
             version="${BASH_REMATCH[1]}"
             release=true
-          elif [[ "$COMMIT_MSG" =~ build:([0-9A-Za-z._-]+) ]]; then
+          elif [[ "$COMMIT_MSG" =~ build:([0-9A-Za-z._+-]+) ]]; then
             version="${BASH_REMATCH[1]}"
           fi
 
-          # strep
+          # strip trailing punctuation (e.g. "build:1.0.0.")
           version="${version%%[._-]}"
 
           if [[ -z "$version" ]]; then
-            echo "No dbuild:/release: tag in commit message, nothing to do."
+            echo "No build:/release: tag in commit message, nothing to do."
             echo "version=" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
-          # X.X.X -> draft release, anything else (2.3.1-b etc.) -> pre-release
+          # X.X.X -> draft release, anything else (2.3.1-b1, 2.3.1+test etc.) -> pre-release
           if [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             prerelease=false
           else
@@ -97,7 +99,7 @@ jobs:
 
       # Use uv for deps and cache lock file
       - name: Set up uv
-        uses: astral-sh/setup-uv@v10.3.0
+        uses: astral-sh/setup-uv@v10.3.3
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           enable-cache: true
@@ -261,7 +263,7 @@ jobs:
           PRERELEASE: ${{ needs.prepare.outputs.prerelease }}
         run: |
           if [[ "$PRERELEASE" == "true" ]]; then
-            flag="--prerelease"   # e.g. 2.3.1-b: published right away as a pre-release
+            flag="--prerelease"   # e.g. 2.3.1-b1: published right away as a pre-release
           else
             flag="--draft"        # e.g. 1.0.0: stays hidden until you publish it
           fi
