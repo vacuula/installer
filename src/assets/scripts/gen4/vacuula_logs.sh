@@ -11,6 +11,16 @@ echo "collecting logs" >> /tmp/vacuula-logs/vacuula.log
 
 chmod 1777 /tmp/vacuula-logs
 
+# Battery reset
+if [ "$(sed -n '2p' /user/tron/vacuula.ini)" = "RESET_BATTERY" ]; then
+    echo "battery reset" >> /tmp/vacuula-logs/vacuula.log
+    /usr/local/bin/roboctrl -B r >> /tmp/vacuula-logs/vacuula.log 2>&1
+    /usr/local/bin/roboctrl -B t >> /tmp/vacuula-logs/vacuula.log 2>&1
+    /usr/local/bin/roboctrl -B c >> /tmp/vacuula-logs/vacuula.log 2>&1
+    sed -i '2s/.*//' /user/tron/vacuula.ini
+    echo "battery reset done" >> /tmp/vacuula-logs/vacuula.log
+fi
+
 /bin/journalctl -b -eu tron.service > /tmp/vacuula-logs/tron.log
 /bin/journalctl -b -eu robot.service > /tmp/vacuula-logs/robot.log
 /bin/journalctl -b -eu wpa_supplicant@wlan0.service > /tmp/vacuula-logs/wifi.log

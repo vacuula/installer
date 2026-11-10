@@ -170,7 +170,20 @@ class Gen4Provisioner(QObject):
             """).encode('utf-8')
         mtp.send_file('/etc/hosts', storage_id, hosts_config)
 
-        mtp.send_file('/user/tron/vacuula.ini', storage_id, self.vacuula_server_ip.encode('utf-8'))
+        # TODO: right now very rudamentory this should be options in installer, not via commandline args, just for testing rn
+        RESET_BATTERY = "--reset-battery" in sys.argv
+        RESET_MAPS = "--reset-maps" in sys.argv
+
+        vacuula_config = dedent(f"""\
+            {self.vacuula_server_ip}
+            {"RESET_BATTERY" if RESET_BATTERY else ""}
+        """).encode('utf-8')
+
+        mtp.send_file('/user/tron/vacuula.ini', storage_id, vacuula_config)
+
+        if RESET_MAPS:
+            with open(SCRIPTS_DIR / "gen4" / "mapsdb_empty", 'rb') as f:
+                mtp.send_file("/user/databases/mapsdb", storage_id, f.read())
 
 
     def _on_step(self, step: int) -> None:

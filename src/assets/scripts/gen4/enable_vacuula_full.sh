@@ -12,6 +12,9 @@ chmod a+r /user/tron/local.ini
 chmod a+r /home/root/tron/config/ssl/vacuula.crt
 chmod a+r /etc/wpa_supplicant/wpa_supplicant-wlan0.conf
 chmod a+r /etc/hosts
+# mapsdb
+chown root:robotsvc /user/databases/mapsdb
+chmod 777 /user/databases/mapsdb
 
 # Disable "orbital." prefix in server address
 if [ ! -f /home/root/tron/tron/configutils.py.bak ]

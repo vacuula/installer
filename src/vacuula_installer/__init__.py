@@ -24,7 +24,7 @@ sys.excepthook = lambda t, e, tb: logger.critical("Uncaught exception", exc_info
 threading.excepthook = lambda a: logger.critical("Uncaught exception in thread", exc_info=(a.exc_type, a.exc_value, a.exc_traceback))
 
 def main() -> int:
-    logger.info("Starting Vacuula Installer v%s", APP_VERSION)
+    logger.info("Starting Vacuula Installer v%s, options: %s", APP_VERSION, sys.argv[1:])
 
     app = QApplication(sys.argv)
     apply_app_palette(app)
