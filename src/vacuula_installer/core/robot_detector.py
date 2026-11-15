@@ -40,6 +40,13 @@ if sys.platform == "win32":
         raise RuntimeError(
             f"Could not load libusb backend from {LIBUSB_DLL}"
         )
+elif sys.platform == "darwin":
+    # macOS ships no libusb; libusb-package bundles one per architecture
+    # (x86_64 from macOS 10.9, arm64 from 11), so Intel and Apple silicon both work.
+    import libusb_package
+    USB_BACKEND = libusb_package.get_libusb1_backend()
+    if USB_BACKEND is None:
+        raise RuntimeError("Could not load libusb backend from libusb-package")
 else:
     USB_BACKEND = None
 

@@ -3,6 +3,7 @@ from __future__ import annotations
 import io
 import logging
 import os
+import sys
 from collections.abc import Callable, Iterable
 from typing import BinaryIO, Union
 
@@ -318,3 +319,11 @@ class MtpDevice:
                 continue
             logger.debug(f"{prefix}[{handle:#010x}] {name}")
             self.dump_tree(storage_id, handle, prefix + "  ")
+
+
+def usb_mtp_device(dev: usb.core.Device) -> MtpDevice:
+    """libusb MTP device for this platform (Linux/macOS; Windows uses WPD)."""
+    if sys.platform == "darwin":
+        from .macos import MacMtpDevice
+        return MacMtpDevice(dev)
+    return MtpDevice(dev)
