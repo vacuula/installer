@@ -92,11 +92,12 @@ LANGUAGES: dict[str, LanguageMeta] = {
     "nl": LanguageMeta(flag_svg=FLAGS_DIR / "nl.svg", native_name="Nederlands"),
     "pt": LanguageMeta(flag_svg=FLAGS_DIR / "pt.svg", native_name="Português"),
     "fr": LanguageMeta(flag_svg=FLAGS_DIR / "fr.svg", native_name="Français"),
+    "tr": LanguageMeta(flag_svg=FLAGS_DIR / "tr.svg", native_name="Türkçe"),
 }
 DEFAULT_LANGUAGE = "en" #might be replaced with system locale? I dunno how to fetch safely crossplatform
 
 # Backgroundflair, maybe do languages actually translated to?
 FLAIR_WELCOME_WORDS: list[str] = [
     "Welcome", "Willkommen", "Bienvenue", "Bienvenida", "Benvenuto",
-    "Bem-vindo", "いらっしゃいませ", "Välkommen", "Velkommen", "Tervetuloa",
+    "Bem-vindo", "いらっしゃいませ", "Välkommen", "Velkommen", "Tervetuloa", "Hoş geldiniz",
 ]
