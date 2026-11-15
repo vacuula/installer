@@ -158,10 +158,8 @@ patch_port () {
 make_mod () {
     log "Making modded astro binary at ${MODDED_ASTRO}"
     log "Copying original astro from ${ASTRO}"
-    mkdir -p ${FOLDER} || { log "mkdir failed"; exit 1; }
-    err=$(cp ${ASTRO} ${MODDED_ASTRO} 2>&1) || { log "cp failed: ${err}"; df -k /emmc > /dev/serusb1 2>&1; exit 1; }
-    #mkdir -p ${FOLDER}
-    #cp ${ASTRO} ${MODDED_ASTRO}
+    mkdir -p ${FOLDER}
+    cp ${ASTRO} ${MODDED_ASTRO}
 
     log "Copying certificate files to ${FOLDER}"
     cp /emmc/vacuula/cert.pem ${FOLDER}/___Nucleo.crt
