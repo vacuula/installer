@@ -31,6 +31,7 @@ if [ -d /emmc/vacuula ]; then
     # if vacuula is already installed, remove all files and reinitialize
     log "Vacuula already installed, removing existing files"
     echo "[[vacuula-installer-reinstalling]]" > /dev/serusb1
+    find /emmc/vacuula -type l -exec rm -f {} + # remove symlinks
     rm -r /emmc/vacuula # remove vacuula
     rm -f /tmp/vacuula_lock # remove lock file
 fi
