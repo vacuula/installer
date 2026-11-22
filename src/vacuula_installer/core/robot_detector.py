@@ -91,6 +91,7 @@ class RobotDetector(QObject):
     robotDisconnected = Signal()
     robotDetected = Signal(str, usb.core.Device)  # display_name, serial_device TODO, usb_device
     gen23VersionText = Signal(str) # temp solution, should be looked over how exactly this should be fetched and saved
+    serialPermissionError = Signal(str)
 
     # Probably never happens but needs to be handled:
     multipleRobotsDetected = Signal()
@@ -220,7 +221,13 @@ class RobotDetector(QObject):
         cached = self._resolved_cache.get(cache_key)
         if cached in candidates:
             return cached
-        version_output = self._query_get_version(dev)
+        try:
+            version_output = self._query_get_version(dev)
+        except PermissionError:
+            target_serial = RobotDetector._get_serial(dev)
+            port_name = RobotDetector._find_serial_port(dev, target_serial) or "serial port"
+            self.serialPermissionError.emit(port_name)
+            return None
         self.gen23VersionText.emit(version_output or "")
         if version_output is None:
             return None
@@ -270,7 +277,13 @@ class RobotDetector(QObject):
                 ser.write(cmd.encode("ascii") + b"\n")
                 ser.flush()
                 raw = ser.read(4096)
-        except (serial.SerialException, OSError):
+        except PermissionError as e:
+            logger.warning("Permission denied opening serial port %s: %s", port_name, e)
+            raise
+        except (serial.SerialException, OSError) as e:
+            if "Permission denied" in str(e) or getattr(e, "errno", None) == 13:
+                logger.warning("Permission denied opening serial port %s: %s", port_name, e)
+                raise PermissionError(f"Permission denied: {port_name}") from e
             return None
         return raw.decode("ascii", errors="ignore")
 

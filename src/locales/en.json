@@ -1,5 +1,5 @@
 {
-  "String-version": "16",
+  "String-version": "17",
   "app.window_title": "Vacuula-ifiyer",
   "app.version": "Installer v{version}",
   "app.download_logs": "Download logs",
@@ -59,6 +59,7 @@
   "connect.howto": "🛈 <i>There is a USB contact under the dustbin, the green &quot;cable&quot; in the illustration ends at its approximate location</i>",
   "connect.status.waiting": "No robot detected yet",
   "connect.status.detected": "{model} detected",
+  "connect.status.permission_error": "Permission denied on {port} (check dialout group or udev rules)",
   "connect.start_install": "Start install",
   "connect.installing": "Starting...",
 

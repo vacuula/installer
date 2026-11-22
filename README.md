@@ -57,7 +57,13 @@ We offer no guarantee, __you try to revive your robot on your own risk__ - we ar
 
 ## Frequently asked questions
 
-- Robot not detected on Linux and you have a gen3 device? You need to add yourself to the group dialout `sudo usermod -aG dialout <username>` and reboot your computer
+- Robot not detected on Linux? This is usually due to missing serial/USB permissions on `/dev/ttyACM*`. You can either:
+  - Install the included udev rule (no reboot required):
+    ```bash
+    sudo cp udev/99-vacuula.rules /etc/udev/rules.d/
+    sudo udevadm control --reload-rules && sudo udevadm trigger
+    ```
+  - Or add yourself to the `dialout` group: `sudo usermod -aG dialout $USER` and log out/reboot.
 - WiFi is required on the computer used to bite Gen2/Gen3 robots!
 - READ THE DISCLAIMER, it has important information!
 - Server IP changed? Gen4 robots initially try to use mDNS (`vacuula.local`) unless you entered the IP by hand during install, it also fallbacks to ip if mDNS fails. Gen3 robots keep the IP from the install, so they need the old address back or a new run of the installer. Reserving the server's address in your router's DHCP settings avoids the problem.
