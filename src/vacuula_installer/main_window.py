@@ -303,6 +303,9 @@ class MainWindow(QMainWindow):
         self._robot_detector.robotDisconnected.connect(
             self._handle_robot_disconnected
         )
+        self._robot_detector.serialPermissionError.connect(
+            self._connect_screen.show_permission_error
+        )
 
         self._firmware_detector.firmwareDetected.connect(self._on_firmware)
 

@@ -104,6 +104,13 @@ class ConnectRobotScreen(QWidget):
         )
         self._spinner.stop()
 
+    def show_permission_error(self, port: str) -> None:
+        """Show permission error when serial port access is denied."""
+        self._status_label.setText(
+            self._translator.tr("connect.status.permission_error", port=port)
+        )
+        self._spinner.stop()
+
     def _retranslate(self) -> None:
         self._instruction_label.setText(self._translator.tr("connect.title"))
         self._how_to_label.setText(self._translator.tr("connect.howto"))

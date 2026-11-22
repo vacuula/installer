@@ -1,0 +1,8 @@
+# Vacuula Installer USB rules for Linux
+# Grants unprivileged user access to Neato robot USB CDC serial and gadget devices without requiring group reboots.
+
+# Neato Botvac Connected series (Gen2/Gen3 CDC Serial)
+SUBSYSTEM=="tty", ATTRS{idVendor}=="2108", ATTRS{idProduct}=="780c", MODE="0666", GROUP="dialout"
+
+# Neato D8/D9/D10 series (Gen4 USB Gadget)
+SUBSYSTEM=="usb", ATTRS{idVendor}=="1d6b", ATTRS{idProduct}=="0100", MODE="0666"
